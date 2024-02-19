@@ -19,8 +19,8 @@ export const Component = (props: ComponentProps) => {
 
     const pipeOutput = (state: State) => {
         if (outputs) {
-            outputs.forEach((fn) => {
-                if (fn.name in context.outputs) {
+            outputs.forEach((fn:Reducer) => {
+                if (context.outputs && fn.name in context.outputs) {
                     const toRender = context.outputs[fn.name].apply(null, fn.args)
                     toRender(node, state)
                 } else {
@@ -38,7 +38,7 @@ export const Component = (props: ComponentProps) => {
             .reduce((newState: any, pipe: Pipe) => {
                 potentialChanges = true
                 newState = pipe.reducers.reduce((newState, fn: Reducer) => {
-                    if (fn.name in context.pipes) {
+                    if (context.pipes && fn.name in context.pipes) {
                         const updateState = context.pipes[fn.name].apply(null, fn.args)
                         newState = updateState(newState, state)
                         logger.log(`${id} [pipe] ${fn.name}(${fn.args.join(',')})`, newState, state)
@@ -50,7 +50,7 @@ export const Component = (props: ComponentProps) => {
                 return newState
             }, payload)
 
-        if (potentialChanges && !context.deepEqual(state, newState)) {
+        if (potentialChanges && context.deepEqual && !context.deepEqual(state, newState)) {
             state = newState
             pipeOutput(newState)
         }
@@ -60,7 +60,7 @@ export const Component = (props: ComponentProps) => {
         if (typeof onAction === 'function') {
             let sendAction = true
             state = trigger.reducers.reduce((newState, fn: Reducer) => {
-                if (fn.name in context.triggers) {
+                if (context.triggers && fn.name in context.triggers) {
                     const toFire = context.triggers[fn.name].call(null, fn.args)
                     const [_, _state] = toFire(event, newState)
                     newState = _state
@@ -91,15 +91,11 @@ export const Component = (props: ComponentProps) => {
         })
     }
 
-    const unsubscribe = () => {}
-
-    subscribe()
+    subscribe();
 
     return {
         id,
         name,
         pipeState,
-        subscribe,
-        //unsubscribe,
     }
 }
