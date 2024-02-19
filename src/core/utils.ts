@@ -1,4 +1,4 @@
-import type { LogLevel, Logger } from './statepipe.types';
+import type { LogLevel, Logger } from '../statepipe.types';
 
 export const uid = () =>
   crypto.getRandomValues(new Uint32Array(10))[0].toString(16);

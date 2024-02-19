@@ -1,5 +1,5 @@
 import { Trigger } from '../statepipe.types'
-import { uid } from '../utils'
+import { uid } from './utils'
 import parseReducer from './parse.reducer'
 /**
  * Expected values
