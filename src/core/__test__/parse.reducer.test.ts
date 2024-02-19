@@ -12,3 +12,7 @@ test('given fn returns valid reducer with name', () => {
 test('given fn:a:b:c returns valid reducer with args', () => {
     expect(parser('fn:a:b:c')).toStrictEqual({ name: 'fn', args: ["a","b","c"] })
 })
+
+test('given fn:a : b:c should trim the args', () => {
+    expect(parser('fn:a : b:c')).toStrictEqual({ name: 'fn', args: ["a","b","c"] })
+})

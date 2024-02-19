@@ -12,7 +12,7 @@ export default (action: string): Reducer | undefined => {
     }
     const [name, ...args] = action.split(':');
     return {
-      name,
-      args,
+      name:name.trim(),
+      args:args.map(arg=>arg.trim()),
     } as Reducer;
   };
