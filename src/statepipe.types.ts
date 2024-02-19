@@ -20,9 +20,11 @@ export interface Trigger {
 export type OutputFunction = (
   args: any
 ) => (node: HTMLElement, state: State) => State;
+
 export type PipeFunction = (
   args: any
 ) => (payload: State, state: State) => State;
+
 export type TriggerFunction = (
   args: any
 ) => (event: Event, state: State) => [Event, State];
