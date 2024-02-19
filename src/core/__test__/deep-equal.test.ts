@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import deepEqual from '../deepEqual'
+import deepEqual from '../deep-equal'
 
 test('should compare numbers', () => {
     expect(deepEqual(1, 1)).toBe(true)
