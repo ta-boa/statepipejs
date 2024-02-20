@@ -17,6 +17,11 @@ export interface Trigger {
   reducers: Reducer[];
 }
 
+export interface Component {
+  id:string,
+  pipeState:()=>void
+}
+
 export type OutputFunction = (
   args: any
 ) => (node: HTMLElement, state: State) => State;
@@ -29,23 +34,21 @@ export type TriggerFunction = (
   args: any
 ) => (event: Event, state: State) => [Event, State];
 
-export interface Context {
-  triggers?: Record<string, TriggerFunction>;
-  pipes?: Record<string, PipeFunction>;
-  outputs?: Record<string, OutputFunction>;
-  deepEqual?: (a: State, b: State) => boolean;
+export interface Providers {
+  trigger: Record<string, TriggerFunction>;
+  pipe: Record<string, PipeFunction>;
+  output: Record<string, OutputFunction>;
 }
 
 export interface InitializationProps {
   root: HTMLElement;
   selectors: string[];
-  context?: Context;
+  providers: Providers;
 }
 
 export interface StatepipeProps {
   node: HTMLElement;
-  context?: Context;
-  logger: Logger;
+  providers: Providers;
 }
 
 export type LogLevel = 'verbose' | 'error' | 'warning';
@@ -58,7 +61,6 @@ export interface Logger {
 
 export interface ComponentProps {
   node: HTMLElement;
-  context: Context;
-  logger: Logger;
+  providers: Providers;
   onAction: (componentId: string, action: string, state: any) => void;
 }

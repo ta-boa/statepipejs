@@ -13,7 +13,7 @@ test('given "false" return boolean false', () => {
 test('given "10" return number 10', () => {
     expect(parser('10')).toBe(10)
 })
-test('given "10.10" return number 10.10', () => {
+test('given "10.10" return number 10.1', () => {
     expect(parser('10.10')).toBe(10.1)
 })
 test('given "{value:10}" return object {value:10}', () => {

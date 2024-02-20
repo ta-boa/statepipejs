@@ -7,7 +7,63 @@
     <title>Vite + TS</title>
   </head>
   <body>
-    <div id="app"></div>
+    <section id="app">
+      <div class="product grape">
+        <sup>using payload to manage state</sub>
+        <strong class="product-image">🍇</strong><br />
+        <div>
+          <button
+            data-component
+            data-state="0"
+            data-pipe="remove->pick:payload"
+            data-trigger="add@click|inc"
+          >
+            +
+          </button>
+          <span
+            data-component
+            data-state="0"
+            data-output="text"
+            data-pipe="add->pick:payload,remove->pick:payload"
+            >0</span
+          >
+          <button
+            data-component
+            data-state="0"
+            data-pipe="add->pick:payload"
+            data-trigger="remove@click|dec|max:0"
+          >
+            -
+          </button>
+        </div>
+      </div>
+      <div class="product banana">
+        <sup>single state</sub>
+        <strong class="product-image">🍌</strong><br />
+        <div>
+          <button
+            data-component
+            data-pipe="remove->pick"
+            data-trigger="add@click"
+          >
+            +
+          </button>
+          <span
+            data-component
+            data-state="0"
+            data-output="text"
+            data-pipe="add->pick:self|inc,remove->pick:self|dec"
+            >0</span
+          >
+          <button
+            data-component
+            data-trigger="remove@click"
+          >
+            -
+          </button>
+        </div>
+      </div>
+    </section>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
