@@ -1,10 +1,17 @@
 import './styles/style.css'
-import { getComponent } from './core/component';
-import providers from "./providers";
 
-getComponent({
-    onAction: () => { },
+import providers from "./providers";
+import statepipe from "./statepipe";
+
+const sp = statepipe({
+    selectors:[".grape",".banana"],
     providers,
-    node: document.querySelector("[data-component]") as HTMLElement,
+    root:document.body
 })
+console.log(sp)
+// createComponent({
+//     onAction: () => { },
+//     providers,
+//     node: document.querySelector("[data-component]") as HTMLElement,
+// })
 

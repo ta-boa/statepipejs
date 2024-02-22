@@ -7,10 +7,9 @@ import deepEqual from './deep-equal'
 
 import type { Reducer, Trigger, Pipe, ComponentProps, State, Component } from '../statepipe.types'
 
-export const getComponent = (props: ComponentProps) : Component => {
-    const { node, providers, onAction } = props
+export const createComponent = (props: ComponentProps): Component => {
+    const { node, providers, onAction, logger } = props
     const id = uid()
-    const logger = getLogger();
     const listeners = new Map()
 
     let state = parseState(node.dataset.state || '')
@@ -92,7 +91,7 @@ export const getComponent = (props: ComponentProps) : Component => {
         })
     }
 
-    subscribe();
+    subscribe()
     logger.log(`component.${id} created with state`, state, typeof state)
 
     return {

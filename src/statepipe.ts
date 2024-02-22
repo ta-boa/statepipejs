@@ -1,32 +1,33 @@
-import { uid, getLogger } from './core/utils';
-import { getComponent } from './core/component';
-import { InitializationProps, StatepipeProps, Component } from './statepipe.types';
+import { uid, getLogger } from './core/utils'
+import { createComponent } from './core/component'
+import { InitializationProps, StatepipeProps, Component, LogLevel } from './statepipe.types'
 
 const Statepipe = (props: StatepipeProps) => {
-    let components : Component[] = [];
-    const id = uid();
-    const logger = getLogger();
-    const { node, providers } = props
+    let components: Component[] = []
+    const id = uid()
+    const { node, providers, logger } = props
 
-    const onAction = (
-        componentId: string,
-        action: string,
-        payload: any
-    ): void => {
-        logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload);
+    const onAction = (componentId: string, action: string, payload: any): void => {
+        logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload)
         components.forEach((comp) => {
-            comp.pipeState(action, payload);
-        });
-    };
+            comp.pipeState(action, payload)
+        })
+    }
 
-    components = Array.from(node.querySelectorAll('[data-component]')).map(
-        (node: unknown) => {
+    components = Array.from(node.querySelectorAll('[data-component]'))
+        .map((node: unknown) => {
             if (node instanceof HTMLElement) {
-                return getComponent({ node, providers, onAction });
+                return createComponent({
+                    node,
+                    providers,
+                    onAction,
+                    logger,
+                })
             }
-        }
-    ).filter(component => !!component) as Component[]
-    logger.log(`created with components ${components.length}`);
+        })
+        .filter((component) => !!component) as Component[]
+
+    logger.log(`${id}.statepipe ${components.length} components created`)
 
     //  const handleMutation = (mutations) => {
     //    console.log('mutations', mutations);
@@ -47,27 +48,25 @@ const Statepipe = (props: StatepipeProps) => {
     //  };
 
     return {
+        id,
         components,
-    };
-};
+    }
+}
 
 export default (props: InitializationProps) => {
-    const logger = getLogger('verbose', `statepipe::${uid()}`)
+    const { root, selectors, providers, logLevel } = props
     const id = uid()
-    const { root, selectors, providers } = props;
-    if (!selectors.length) {
-        logger.warn(`${id}.statepipe invalid selector.`)
-        return;
-    }
-    const apps = selectors.map((selector) => {
-        const node = root.querySelector(selector);
-        if (node instanceof HTMLElement) {
-            return Statepipe({
-                node,
-                providers,
-            });
-        }
-    });
-
-    return { apps };
-};
+    return selectors
+        .map((selector) => {
+            return Array.from(root.querySelectorAll(selector)).map((node) => {
+                if (node instanceof HTMLElement) {
+                    return Statepipe({
+                        node,
+                        providers,
+                        logger: getLogger(logLevel || ('verbose' as LogLevel), id),
+                    })
+                }
+            })
+        })
+        .flat()
+}
