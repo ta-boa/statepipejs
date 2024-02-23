@@ -51,7 +51,7 @@ export interface InitializationProps {
 export interface StatepipeProps {
     node: HTMLElement
     providers: Providers
-    logger: Logger
+    logLevel?: LogLevel
 }
 
 export type LogLevel = 'verbose' | 'error' | 'warning'

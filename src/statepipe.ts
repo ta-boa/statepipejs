@@ -1,11 +1,12 @@
 import { uid, getLogger } from './core/utils'
 import { createComponent } from './core/component'
-import { InitializationProps, StatepipeProps, Component, LogLevel } from './statepipe.types'
+import { InitializationProps, StatepipeProps, Component } from './statepipe.types'
 
 const Statepipe = (props: StatepipeProps) => {
     let components: Component[] = []
     const id = uid()
-    const { node, providers, logger } = props
+    const { node, providers, logLevel } = props
+    const logger = getLogger(logLevel, id);
 
     const onAction = (componentId: string, action: string, payload: any): void => {
         logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload)
@@ -27,7 +28,7 @@ const Statepipe = (props: StatepipeProps) => {
         })
         .filter((component) => !!component) as Component[]
 
-    logger.log(`${id}.statepipe ${components.length} components created`)
+    logger.log(`${components.length} components created`)
 
     //  const handleMutation = (mutations) => {
     //    console.log('mutations', mutations);
@@ -55,7 +56,6 @@ const Statepipe = (props: StatepipeProps) => {
 
 export default (props: InitializationProps) => {
     const { root, selectors, providers, logLevel } = props
-    const id = uid()
     return selectors
         .map((selector) => {
             return Array.from(root.querySelectorAll(selector)).map((node) => {
@@ -63,7 +63,7 @@ export default (props: InitializationProps) => {
                     return Statepipe({
                         node,
                         providers,
-                        logger: getLogger(logLevel || ('verbose' as LogLevel), id),
+                        logLevel: logLevel || 'verbose',
                     })
                 }
             })

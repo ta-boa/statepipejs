@@ -12,6 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 body {
   margin: 0;
   padding:3rem;
@@ -25,4 +26,26 @@ body {
     color: #213547;
     background-color: #ffffff;
   }
+}
+
+.product {
+  display:inline-flex;
+  flex-direction: column;
+  border:1px solid;
+  padding:1rem;
+  margin: 1rem;
+  max-width:200px;
+}
+.product .title{
+  display:flex;
+  flex-direction: column;
+}
+.product .image{
+  display:flex;
+  flex:1;
+  font-size:3rem;
+}
+.product .controls{
+  display:flex;
+  margin-top: 1rem;
 }
