@@ -3,9 +3,9 @@ import parseState from './parse.state'
 import parseTrigger from './parser.trigger'
 import parseOutput from './parse.output'
 import parsePipe from './parse.pipe'
-import deepEqual from './deep-equal'
+import deepEqual from './deep.equal'
 
-import type { Reducer, Trigger, Pipe, ComponentProps, State, Component } from '../statepipe.types'
+import type { Reducer, Trigger, Pipe, ComponentProps, StateSchema, Component } from '../statepipe.types'
 
 export const createComponent = (props: ComponentProps): Component => {
     const { node, providers, onAction, logger } = props
@@ -17,7 +17,7 @@ export const createComponent = (props: ComponentProps): Component => {
     const triggers = parseTrigger(node.dataset.trigger || '')
     let state = parseState(node.dataset.state || '')
 
-    const pipeOutput = (state: State) => {
+    const pipeOutput = (state: StateSchema) => {
         if (outputs) {
             outputs.forEach((fn: Reducer) => {
                 if (providers.output && fn.name in providers.output) {
@@ -58,7 +58,7 @@ export const createComponent = (props: ComponentProps): Component => {
 
     const reduceStateForTrigger =
         (event: Event, sendAction = true) =>
-        (newState: State, fn: Reducer) => {
+        (newState: StateSchema, fn: Reducer) => {
             if (!(fn.name in providers.trigger) && sendAction) {
                 sendAction = false
                 logger.warn(`${id} [action] missing function ${fn.name}`)

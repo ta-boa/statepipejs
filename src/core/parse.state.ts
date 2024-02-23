@@ -1,11 +1,11 @@
-import { State } from '../statepipe.types'
+import { StateSchema } from '../statepipe.types'
 
-export default (state: string): State => {
+export default (state: string): StateSchema | undefined => {
     if (state.match(/^[\d.]+$/)) {
-        return Number(state)
+        return {value:Number(state)}
     }
     if (state.match(/^true|false$/)) {
-        return state === 'true'
+        return {value:state === 'true'}
     }
     if (state.match(/^[{\[].*[}\]]$/)) {
         try {
@@ -14,5 +14,5 @@ export default (state: string): State => {
             return undefined
         }
     }
-    return state;
+    return {value:state}
 }

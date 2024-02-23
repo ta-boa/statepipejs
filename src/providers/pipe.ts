@@ -1,9 +1,9 @@
-import { PipeFunction, State } from '../statepipe.types'
+import { PipeFunction, StateSchema } from '../statepipe.types'
 
 export default {
     inc:
         (args: any = 1) =>
-        (payload: State, state: State): number => {
+        (payload: StateSchema, state: StateSchema): number => {
             if (typeof state === 'number') {
                 return state + Number(args)
             }
@@ -11,11 +11,11 @@ export default {
         },
     dec:
         (args: any = 1) =>
-        (payload: State, state: State): any => {
+        (payload: StateSchema, state: StateSchema): any => {
             if (typeof state === 'number') state -= Number(args)
             return state
         },
-    pick: (args: any) => (payload: State, state: State) => {
+    pick: (args: any) => (payload: StateSchema, state: StateSchema) => {
         if (args === 'payload') {
             return payload
         }

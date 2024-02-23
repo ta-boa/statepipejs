@@ -1,4 +1,6 @@
-export type State = any
+export type StateSchema = {
+    value:any
+}
 
 export interface Reducer {
     name: string
@@ -19,7 +21,7 @@ export interface Trigger {
 
 export interface Component {
     id: string
-    pipeState: (action: string, payload: State) => void
+    pipeState: (action: string, payload: StateSchema) => void
 }
 
 export interface ComponentProps {
@@ -29,11 +31,11 @@ export interface ComponentProps {
     logger: Logger
 }
 
-export type OutputFunction = (args: any) => (node: HTMLElement, state: State) => State
+export type OutputFunction = (args: any) => (node: HTMLElement, state: StateSchema) => StateSchema
 
-export type PipeFunction = (args: any) => (payload: State, state: State) => State
+export type PipeFunction = (args: any) => (payload: StateSchema, state: StateSchema) => StateSchema
 
-export type TriggerFunction = (args: any) => (event: Event, state: State) => [Event, State]
+export type TriggerFunction = (args: any) => (event: Event, state: StateSchema) => [Event, StateSchema]
 
 export interface Providers {
     trigger: Record<string, TriggerFunction>
