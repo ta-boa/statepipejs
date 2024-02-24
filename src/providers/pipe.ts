@@ -1,24 +1,16 @@
 import { PipeFunction, StateSchema } from '../statepipe.types'
 
 export default {
-    inc:
-        (args: any = 1) =>
-        (payload: StateSchema, state: StateSchema): number => {
-            if (typeof state === 'number') {
-                return state + Number(args)
+    inc: (arg: string) => {
+        const num = Number(arg || 1)
+        return (_, state: StateSchema) => {
+            if (state && typeof state.value === "number" && isNaN(num) === false) {
+                state.value = state.value + num;
             }
             return state
-        },
-    dec:
-        (args: any = 1) =>
-        (payload: StateSchema, state: StateSchema): any => {
-            if (typeof state === 'number') state -= Number(args)
-            return state
-        },
-    pick: (args: any) => (payload: StateSchema, state: StateSchema) => {
-        if (args === 'payload') {
-            return payload
         }
-        return state
     },
+    pick: () => (payload: StateSchema) => {
+        return payload
+    }
 } as Record<string, PipeFunction>

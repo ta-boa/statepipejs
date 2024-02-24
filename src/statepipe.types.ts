@@ -1,22 +1,24 @@
+type NestedValue = { [key: string]: NestedValue | any[] } | undefined | null | string | number | boolean | any[]
+
 export type StateSchema = {
-    value:any
+    value: NestedValue
 }
 
-export interface Reducer {
+export interface StateReducer {
     name: string
     args: string[]
 }
 
 export interface Pipe {
     action: string
-    reducers: Reducer[]
+    reducers: StateReducer[]
 }
 
 export interface Trigger {
     id: string
     event: string
     action: string
-    reducers: Reducer[]
+    reducers: StateReducer[]
 }
 
 export interface Component {
@@ -31,11 +33,11 @@ export interface ComponentProps {
     logger: Logger
 }
 
-export type OutputFunction = (args: any) => (node: HTMLElement, state: StateSchema) => StateSchema
+export type OutputFunction = (...args: string[]) => (node: HTMLElement, state: StateSchema) => StateSchema
 
-export type PipeFunction = (args: any) => (payload: StateSchema, state: StateSchema) => StateSchema
+export type PipeFunction = (...args: string[]) => (payload: StateSchema, state: StateSchema) => StateSchema
 
-export type TriggerFunction = (args: any) => (event: Event, state: StateSchema) => [Event, StateSchema]
+export type TriggerFunction = (...args: string[]) => (event: Event, state: StateSchema) => StateSchema | undefined
 
 export interface Providers {
     trigger: Record<string, TriggerFunction>
@@ -56,7 +58,7 @@ export interface StatepipeProps {
     logLevel?: LogLevel
 }
 
-export type LogLevel = 'verbose' | 'error' | 'warning'
+export type LogLevel = 'verbose' | 'error' | 'warning' | "off"
 export interface Logger {
     log: (...message: any) => void
     warn: (...message: any) => void

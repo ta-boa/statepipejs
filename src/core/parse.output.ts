@@ -1,13 +1,13 @@
 import parseReducer from "./parse.reducer";
-import {Reducer} from "../statepipe.types";
+import {StateReducer} from "../statepipe.types";
 
 /**
  * fn:a:b,fn:c
  */
-export default (blocks: string) : Reducer[] => {
+export default (blocks: string) : StateReducer[] => {
     blocks = blocks.trim()
     if (blocks.length) {
-      return blocks.split('|').map(parseReducer) as Reducer[]
+      return blocks.split('|').map(parseReducer) as StateReducer[]
     }
     return [];
   };

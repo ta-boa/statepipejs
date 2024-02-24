@@ -15,7 +15,7 @@
           <button
             data-component
             data-state="0"
-            data-pipe="remove->pick:payload"
+            data-pipe="remove->pick,add->pick"
             data-trigger="add@click|inc"
           >
             +
@@ -24,20 +24,20 @@
             data-component
             data-state="0"
             data-output="text"
-            data-pipe="add->pick:payload,remove->pick:payload"
+            data-pipe="add->pick,remove->pick"
             >0</span
           >
-          <button
+           <button
             data-component
             data-state="0"
-            data-pipe="add->pick:payload"
+            data-pipe="add->pick,remove->pick"
             data-trigger="remove@click|dec|max:0"
           >
             -
           </button>
         </div>
       </div>
-      <div class="product banana">
+      <!-- <div class="product banana">
         <sup class="title">single state</sub>
         <strong class="image">🍌</strong><br />
         <div class="controls">
@@ -62,7 +62,7 @@
             -
           </button>
         </div>
-      </div>
+      </div> -->
     </section>
     <script type="module" src="/src/main.ts"></script>
   </body>

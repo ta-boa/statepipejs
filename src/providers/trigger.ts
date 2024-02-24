@@ -1,38 +1,48 @@
 import { StateSchema, TriggerFunction } from '../statepipe.types'
 
 export default {
-    preventDefault: (_: any) => (event: Event, state: StateSchema) => {
+    preventDefault: () => (event: Event, state: StateSchema) => {
         event.preventDefault()
-        return [event, state]
+        return state
     },
-    stopPropagation: (_: any) => (event: Event, state: StateSchema) => {
+    stopPropagation: () => (event: Event, state: StateSchema) => {
         event.stopPropagation()
-        return [event, state]
+        return state
     },
-    min: (args: any) => (event: Event, state: StateSchema) => {
-        const asNumber = Number(args)
-        if (isNaN(asNumber)) {
-            return [event, state]
-        }
-        return [event, Math.min(asNumber, state)]
-    },
-    max: (args: any) => (event: Event, state: StateSchema) => {
-        const asNumber = Number(args)
-        if (isNaN(asNumber)) {
-            return [event, state]
-        }
-        return [event, Math.max(asNumber, state)]
-    },
-    inc: (args: any = 1) => {
-        args = Array.isArray(args) && args.length === 0 ? 1 : args
+    min: (arg: string) => {
+        const num = Number(arg || 0)
         return (event: Event, state: StateSchema) => {
-            return [event, state + Number(args)]
+            if (state && typeof state.value === "number" && isNaN(num) === false) {
+                state.value =  Math.min(state.value , num)
+            }
+            return state
         }
     },
-    dec: (args: any = 1) => {
-        args = Array.isArray(args) && args.length === 0 ? 1 : args
+    max: (arg: string) => {
+        const num = Number(arg || 0)
         return (event: Event, state: StateSchema) => {
-            return [event, state - Number(args)]
+            if (state && typeof state.value === "number" && isNaN(num) === false) {
+                state.value =  Math.max(state.value , num)
+            }
+            return state
         }
     },
+    inc: (arg: string) => {
+        const num = Number(arg || 1)
+        return (event: Event, state: StateSchema) => {
+            if (state && typeof state.value === "number" && isNaN(num) === false) {
+                state.value =  state.value + num;
+            }
+            return state
+        }
+    },
+    dec: (arg: string) => {
+        const toInc = Number(arg || 1)
+        return (event: Event, state: StateSchema) => {
+            if (state && typeof state.value === "number" && isNaN(toInc) === false) {
+                state.value = state.value - toInc;
+            }
+            return state
+        }
+    }
 } as Record<string, TriggerFunction>

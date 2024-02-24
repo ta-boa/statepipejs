@@ -1,4 +1,4 @@
-import { Reducer } from "../statepipe.types";
+import { StateReducer } from "../statepipe.types";
 
 /**
  * Expected formats
@@ -6,7 +6,7 @@ import { Reducer } from "../statepipe.types";
  * fn:a
  * fn:a:b:...
  */
-export default (action: string): Reducer | undefined => {
+export default (action: string): StateReducer | undefined => {
     if (!action.length) {
       return;
     }
@@ -14,5 +14,5 @@ export default (action: string): Reducer | undefined => {
     return {
       name:name.trim(),
       args:args.map(arg=>arg.trim()),
-    } as Reducer;
+    } as StateReducer;
   };

@@ -9,7 +9,7 @@ const Statepipe = (props: StatepipeProps) => {
     const logger = getLogger(logLevel, id);
 
     const onAction = (componentId: string, action: string, payload: any): void => {
-        logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload)
+        //logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload)
         components.forEach((comp) => {
             comp.pipeState(action, payload)
         })
