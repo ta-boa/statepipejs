@@ -84,26 +84,11 @@ export const createComponent = (props: ComponentProps): Component => {
 
     }
 
-    const aaaaaa =
-        (event: Event) => {
-            return (newState: StateSchema, fn: StateReducer): StateSchema | undefined => {
-                if (!(fn.name in providers.trigger)) {
-                    logger.warn(`${id} [action] provider function ${fn.name}`)
-                    return undefined
-                }
-                const reducePayload = providers.trigger[fn.name](...(fn.args as [any]))
-                const [_, _state] = reducePayload(event, newState)
-                logger.log(`${id}.component payload >> ${fn.name}`, newState)
-                newState = _state
-                return newState
-            }
-        }
-
     const handleEventListener = (trigger: Trigger) => (event: Event) => {
         let payload: StateSchema | undefined;
         try {
             logger.log(`${id}.component payload >`, state)
-            payload = trigger.reducers.reduce(aaaaaa(event), { ...state })
+            payload = createPayloadFromState(event,state,trigger,providers.trigger)
         } catch (err) {
             logger.error(`${id}.component error creating payload`, err)
         }
