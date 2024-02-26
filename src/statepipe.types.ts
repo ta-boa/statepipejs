@@ -1,4 +1,11 @@
-type NestedValue = { [key: string]: NestedValue | any[] } | undefined | null | string | number | boolean | any[]
+type NestedValue =
+    | { [key: string]: NestedValue | any[] }
+    | undefined
+    | null
+    | string
+    | number
+    | boolean
+    | any[]
 
 export type StateSchema = {
     value: NestedValue
@@ -30,14 +37,20 @@ export interface ComponentProps {
     node: HTMLElement
     providers: Providers
     onAction: (componentId: string, action: string, state: any) => void
-    logger: Logger
+    origin: string
 }
 
-export type OutputFunction = (...args: string[]) => (node: HTMLElement, state: StateSchema) => StateSchema
+export type OutputFunction = (
+    ...args: string[]
+) => (node: HTMLElement, state: StateSchema) => StateSchema
 
-export type PipeFunction = (...args: string[]) => (payload: StateSchema, state: StateSchema) => StateSchema
+export type PipeFunction = (
+    ...args: string[]
+) => (payload: StateSchema, state: StateSchema) => StateSchema
 
-export type TriggerFunction = (...args: string[]) => (event: Event, state: StateSchema) => StateSchema | undefined
+export type TriggerFunction = (
+    ...args: string[]
+) => (event: Event, state: StateSchema) => StateSchema | undefined
 
 export interface Providers {
     trigger: Record<string, TriggerFunction>
@@ -46,10 +59,8 @@ export interface Providers {
 }
 
 export interface InitializationProps {
-    root: HTMLElement
-    selectors: string[]
+    targets: HTMLElement[]
     providers: Providers
-    logLevel?: LogLevel
 }
 
 export interface StatepipeProps {
@@ -58,7 +69,12 @@ export interface StatepipeProps {
     logLevel?: LogLevel
 }
 
-export type LogLevel = 'verbose' | 'error' | 'warning' | "off"
+export enum LogLevel {
+    verbose = 'verbose',
+    error = 'error',
+    warning = 'warning',
+    off = 'off',
+}
 export interface Logger {
     log: (...message: any) => void
     warn: (...message: any) => void

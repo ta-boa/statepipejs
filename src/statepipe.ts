@@ -1,12 +1,19 @@
 import { uid, getLogger } from './core/utils'
 import { createComponent } from './core/component'
-import { InitializationProps, StatepipeProps, Component } from './statepipe.types'
+import { InitializationProps, StatepipeProps, Component, LogLevel } from './statepipe.types'
 
 const Statepipe = (props: StatepipeProps) => {
     let components: Component[] = []
+    let logLevel: LogLevel = LogLevel.off
+    
     const id = uid()
-    const { node, providers, logLevel } = props
-    const logger = getLogger(logLevel, id);
+    const { node, providers } = props
+    const name = node.dataset.statepipe || id
+
+    if (node.dataset.debug && node.dataset.debug in LogLevel) {
+        logLevel = node.dataset.debug as LogLevel
+    }
+    const logger = getLogger(logLevel, `[${name}]`)
 
     const onAction = (componentId: string, action: string, payload: any): void => {
         //logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload)
@@ -22,7 +29,7 @@ const Statepipe = (props: StatepipeProps) => {
                     node,
                     providers,
                     onAction,
-                    logger,
+                    origin: name,
                 })
             }
         })
@@ -55,15 +62,14 @@ const Statepipe = (props: StatepipeProps) => {
 }
 
 export default (props: InitializationProps) => {
-    const { root, selectors, providers, logLevel } = props
+    const { targets: selectors, providers } = props
     return selectors
         .map((selector) => {
-            return Array.from(root.querySelectorAll(selector)).map((node) => {
+            return Array.from(selector.querySelectorAll('[data-statepipe]')).map((node) => {
                 if (node instanceof HTMLElement) {
                     return Statepipe({
                         node,
                         providers,
-                        logLevel: logLevel || 'verbose',
                     })
                 }
             })

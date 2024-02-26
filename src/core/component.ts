@@ -1,52 +1,60 @@
-import { uid } from './utils'
+import { getLogger, uid } from './utils'
 import parseState from './parse.state'
 import parseTrigger from './parser.trigger'
 import parseOutput from './parse.output'
 import parsePipe from './parse.pipe'
 import useState from './use.state'
-import type {
-    StateReducer,
-    Trigger,
-    Pipe,
-    ComponentProps,
-    StateSchema,
-    Component,
-    TriggerFunction
+import {
+    type StateReducer,
+    type Trigger,
+    type Pipe,
+    type ComponentProps,
+    type StateSchema,
+    type Component,
+    type TriggerFunction,
+    LogLevel,
 } from '../statepipe.types'
 
 export const createPayloadFromState = (
     event: Event,
     state: StateSchema,
     trigger: Trigger,
-    provider: Record<string,
-        TriggerFunction>
+    provider: Record<string, TriggerFunction>
 ): StateSchema => {
-    if (!trigger.reducers.length || !state) return state;
+    if (!trigger.reducers.length || !state) return state
     let payload: StateSchema | undefined = { ...state }
     trigger.reducers
         .filter((reducer) => reducer.name in provider)
         .forEach((reducer: StateReducer) => {
             if (!payload) return
             const providerFn = provider[reducer.name]
-            const reducePayload = providerFn(...(reducer.args));
-            payload = reducePayload(event, payload);
+            const reducePayload = providerFn(...reducer.args)
+            payload = reducePayload(event, payload)
         })
     return payload
 }
 
 export const createComponent = (props: ComponentProps): Component => {
-    const { node, providers, onAction, logger } = props
-
     const id = uid()
+    let logLevel = LogLevel.off
+
+    const { node, providers, onAction, origin } = props
+    const name = node.dataset.component || id
     const listeners = new Map()
     const outputs = parseOutput(node.dataset.output || '')
     const pipes = parsePipe(node.dataset.pipe || '')
     const triggers = parseTrigger(node.dataset.trigger || '')
-    const stateFromParser = parseState(node.dataset.state || '');
+    const stateFromParser = parseState(node.dataset.state || '')
     const defaultState = { value: undefined }
+
     const [state, updateState] = useState(stateFromParser || defaultState, (newState) => {
         pipeOutput(newState)
     })
+
+    if (node.dataset.debug && node.dataset.debug in LogLevel) {
+        logLevel = node.dataset.debug as LogLevel
+    }
+    const logger = getLogger(logLevel, `[${origin}:${name}]`)
 
     const pipeOutput = (state: StateSchema) => {
         if (outputs) {
@@ -55,45 +63,47 @@ export const createComponent = (props: ComponentProps): Component => {
                     const toRender = providers.output[fn.name](...(fn.args as [any]))
                     toRender(node, state)
                 } else {
-                    logger.warn(`${id} [pipe] missing function ${fn.name}`)
+                    logger.warn(`[pipe] missing function ${fn.name}`)
                 }
             })
         }
     }
 
     const pipeState = (action: string, payload: any) => {
-        logger.log(`${id}.component pipe action > ${action}`, payload)
-        const toReduce = pipes
-            .filter((pipe: Pipe) => pipe.action === action);
+        const toReduce = pipes.filter((pipe: Pipe) => pipe.action === action)
 
-        const newState = toReduce.reduce((newState: any, pipe: Pipe) => {
-            newState = pipe.reducers.reduce((accState, fn: StateReducer) => {
-                if (fn.name in providers.pipe) {
-                    const reduceState = providers.pipe[fn.name](...(fn.args as [any]))
-                    accState = reduceState(payload, accState)
-                    logger.log(`${id}.component pipe action reduce >> ${fn.name}`, accState)
-                } else {
-                    logger.warn(`${id}.component missing provider.pipe.${fn.name}`)
-                }
-                return accState
-            }, newState)
-            return newState
-        }, { ...state })
+        const newState = toReduce.reduce(
+            (newState: any, pipe: Pipe) => {
+                newState = pipe.reducers.reduce((accState, fn: StateReducer) => {
+                    if (fn.name in providers.pipe) {
+                        const reduceState = providers.pipe[fn.name](...(fn.args as [any]))
+                        accState = reduceState(payload, accState)
+                    } else {
+                        logger.warn(`missing provider.pipe.${fn.name}`)
+                    }
+                    return accState
+                }, newState)
+                return newState
+            },
+            { ...state }
+        )
 
-        if (toReduce.length) updateState(newState)
-
+        if (toReduce.length) {
+            logger.log(`pipe > '${action}' outcome state >`, payload)
+            updateState(newState)
+        }
     }
 
     const handleEventListener = (trigger: Trigger) => (event: Event) => {
-        let payload: StateSchema | undefined;
+        let payload: StateSchema | undefined
         try {
-            logger.log(`${id}.component payload >`, state)
-            payload = createPayloadFromState(event,state,trigger,providers.trigger)
+            logger.log(`create payload from state >`, state)
+            payload = createPayloadFromState(event, state, trigger, providers.trigger)
         } catch (err) {
-            logger.error(`${id}.component error creating payload`, err)
+            logger.error(`error creating payload`, err)
         }
         if (payload !== undefined && typeof onAction === 'function') {
-            logger.log(`${id}.component fireAction > ${trigger.action}`, payload)
+            logger.log(`fireAction > ${trigger.action}`, payload)
             onAction(id, trigger.action, payload)
         }
     }
@@ -102,18 +112,18 @@ export const createComponent = (props: ComponentProps): Component => {
         triggers.forEach((trigger: Trigger) => {
             const handlerId = `${trigger.id}-${trigger.event}-${uid()}`
             if (listeners.has(trigger.id)) {
-                logger.warn(`component.${id} duplicated trigger`)
+                logger.warn(`duplicated trigger`)
                 return
             }
             const handler = handleEventListener(trigger)
             node.addEventListener(trigger.event, handler)
-            logger.log(`component.${id} listen ${trigger.event}->${trigger.action}`)
+            logger.log(`listen ${trigger.event}->${trigger.action}`)
             listeners.set(handlerId, handler)
         })
     }
 
     subscribe()
-    logger.log(`component.${id} created with state`, state, typeof state)
+    logger.log(`created with state`, state)
 
     return {
         id,

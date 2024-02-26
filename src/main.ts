@@ -3,7 +3,6 @@ import providers from "./providers";
 import statepipe from "./statepipe";
 
 statepipe({
-    selectors:[".grape",".banana"],
+    targets:[document.body],
     providers,
-    root:document.body
 })
