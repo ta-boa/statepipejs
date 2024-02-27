@@ -20,12 +20,14 @@ export default (triggers: string): Trigger[] => {
             const [eventBlock, ...triggerReducers] = action.split('|')
 
             // from a@click to [a,click]
-            const [actionName, eventName] = eventBlock.split('@')
+            const [actionName, event] = eventBlock.split('@')
+            const [eventName, ...eventArgs] = event.split(".")
 
             if (actionName && eventName) {
                 return {
                     id: uid(),
                     event: eventName.trim(),
+                    eventArgs,
                     action: actionName.trim(),
                     reducers: triggerReducers.map(parseReducer),
                 } as Trigger

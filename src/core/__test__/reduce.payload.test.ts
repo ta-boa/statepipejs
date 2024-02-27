@@ -2,7 +2,7 @@ import { Mock, beforeAll, describe, expect, test, vitest } from 'vitest'
 import { StateSchema, Trigger, TriggerFunction } from '../../statepipe.types'
 import reducePayload from "../reduce.payload"
 import parseTrigger from "../parser.trigger"
-import useState from '../use.state'
+import useState from '../state'
 
 const reduceToNumber = vitest.fn().mockImplementation(({ payload }) => {
     payload.value = 10

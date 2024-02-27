@@ -3,10 +3,10 @@ import parseState from './parse.state'
 import parseTrigger from './parser.trigger'
 import parseOutput from './parse.output'
 import parsePipe from './parse.pipe'
-import useState from './use.state'
-import reducePayload from "./reduce.payload"
-import reduceOutput from "./reduce.output"
-import reduceState from "./reduce.state"
+import useState from './state'
+import reducePayload from './reduce.payload'
+import reduceOutput from './reduce.output'
+import reduceState from './reduce.state'
 
 import {
     type Trigger,
@@ -28,7 +28,7 @@ export const createComponent = (props: ComponentProps): Component => {
     const pipeReducers = parsePipe(node.dataset.pipe || '')
     const triggerReducers = parseTrigger(node.dataset.trigger || '')
     const [state, updateState] = useState(parseState(node.dataset.state || ''), (newState) => {
-        logger.log("output state", newState)
+        logger.log('output state', newState)
         reduceOutput(node, newState, outputReducers, providers.output)
     })
 
@@ -37,7 +37,7 @@ export const createComponent = (props: ComponentProps): Component => {
         try {
             newState = reduceState(action, node, payload, state, pipeReducers, providers.pipe)
         } catch (err) {
-            logger.error("error reducing state", payload, newState)
+            logger.error('error reducing state', payload, newState)
         }
         if (newState) {
             logger.log(`| '${action}' state:`, payload)
@@ -47,6 +47,17 @@ export const createComponent = (props: ComponentProps): Component => {
 
     const handleEventListener = (trigger: Trigger) => (event: Event) => {
         let payload: StateSchema | undefined
+        if (trigger.event.match(/keyup|keydown/) && event instanceof KeyboardEvent) {
+            const eventKey = event.key.toLocaleLowerCase()
+            const [keyToMatch] = trigger.eventArgs
+            if (
+                keyToMatch &&
+                keyToMatch.length &&
+                !eventKey.match(keyToMatch.toLocaleLowerCase())
+            ) {
+                return
+            }
+        }
         try {
             payload = reducePayload(event, state, trigger, providers.trigger)
         } catch (err) {
@@ -60,15 +71,22 @@ export const createComponent = (props: ComponentProps): Component => {
 
     const subscribe = () => {
         triggerReducers.forEach((trigger: Trigger) => {
-            const handlerId = `${trigger.id}-${trigger.event}-${uid()}`
-            if (listeners.has(trigger.id)) {
-                return
+            const handlerId = `${trigger.event}-${trigger.id}-${trigger.action}`
+            if (!listeners.has(trigger.id)) {
+                const handler = handleEventListener(trigger)
+                node.addEventListener(trigger.event, handler)
+                logger.log(`listen ${trigger.event}->${trigger.action}`)
+                listeners.set(handlerId, handler)
             }
-            const handler = handleEventListener(trigger)
-            node.addEventListener(trigger.event, handler)
-            logger.log(`listen ${trigger.event}->${trigger.action}`)
-            listeners.set(handlerId, handler)
         })
+    }
+
+    const dispose = () => {
+        Array.from(listeners.entries()).forEach(([key, handler]) => {
+            const [event] = key.split('-')
+            node.removeEventListener(event, handler)
+        })
+        listeners.clear()
     }
 
     subscribe()
@@ -77,5 +95,6 @@ export const createComponent = (props: ComponentProps): Component => {
     return {
         id,
         pipeState,
+        dispose,
     } as Component
 }

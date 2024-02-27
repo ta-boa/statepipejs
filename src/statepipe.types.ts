@@ -24,6 +24,7 @@ export interface Pipe {
 export interface Trigger {
     id: string
     event: string
+    eventArgs: string[]
     action: string
     reducers: StateReducer[]
 }
@@ -41,20 +42,20 @@ export interface ComponentProps {
 }
 
 export interface OutputProps {
-    node: HTMLElement,
-    state: StateSchema,
+    node: HTMLElement
+    state: StateSchema
     args: string[]
 }
 
 export interface PipeProps {
-    payload: StateSchema,
-    state: StateSchema,
-    args: string[],
+    payload: StateSchema
+    state: StateSchema
+    args: string[]
     node: HTMLElement
 }
 export interface TriggerProps {
-    event: Event,
-    payload: StateSchema,
+    event: Event
+    payload: StateSchema
     args: string[]
 }
 
@@ -95,5 +96,6 @@ export interface Logger {
 }
 
 export interface StatePipe {
-    id: string, name: string
+    id: string
+    name: string
 }

@@ -1,5 +1,5 @@
 import { describe, expect, test, vitest } from 'vitest'
-import { onChange, useState } from '../use.state'
+import { onChange, useState } from '../state'
 describe.skip('onChange', () => {
     test('returns an object with initial state and doesnt call the change handler', () => {
         const handler = vitest.fn()
