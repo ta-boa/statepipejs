@@ -36,7 +36,7 @@ export interface Component {
 export interface ComponentProps {
     node: HTMLElement
     providers: Providers
-    onAction: (componentId: string, action: string, state: any) => void
+    onAction: (action: string, state: any) => void
     origin: string
 }
 
@@ -81,4 +81,8 @@ export interface Logger {
     error: (...message: any) => void
     changeLevel: (value: LogLevel) => void
     getLevel: () => LogLevel
+}
+
+export interface StatePipe {
+    id: string, name: string
 }

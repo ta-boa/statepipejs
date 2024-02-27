@@ -1,4 +1,4 @@
-import { getLogger, uid } from './utils'
+import { getDebugLevel, getLogger, uid } from './utils'
 import parseState from './parse.state'
 import parseTrigger from './parser.trigger'
 import parseOutput from './parse.output'
@@ -36,11 +36,11 @@ export const createPayloadFromState = (
 
 export const createComponent = (props: ComponentProps): Component => {
     const id = uid()
-    let logLevel = LogLevel.off
+    const listeners = new Map()
 
     const { node, providers, onAction, origin } = props
     const name = node.dataset.component || id
-    const listeners = new Map()
+    const logger = getLogger(getDebugLevel(node, LogLevel.off), `[${origin}:${name}]`)
     const outputs = parseOutput(node.dataset.output || '')
     const pipes = parsePipe(node.dataset.pipe || '')
     const triggers = parseTrigger(node.dataset.trigger || '')
@@ -50,11 +50,6 @@ export const createComponent = (props: ComponentProps): Component => {
     const [state, updateState] = useState(stateFromParser || defaultState, (newState) => {
         pipeOutput(newState)
     })
-
-    if (node.dataset.debug && node.dataset.debug in LogLevel) {
-        logLevel = node.dataset.debug as LogLevel
-    }
-    const logger = getLogger(logLevel, `[${origin}:${name}]`)
 
     const pipeOutput = (state: StateSchema) => {
         if (outputs) {
@@ -104,7 +99,7 @@ export const createComponent = (props: ComponentProps): Component => {
         }
         if (payload !== undefined && typeof onAction === 'function') {
             logger.log(`fireAction > ${trigger.action}`, payload)
-            onAction(id, trigger.action, payload)
+            onAction(trigger.action, payload)
         }
     }
 

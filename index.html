@@ -7,14 +7,25 @@
         <title>Vite + TS</title>
     </head>
     <body>
-        <section id="app">
-            <div data-statepipe="uva" data-debug="verbose" class="product grape">
+        <section id="app" data-statepipe="wrapper">
+          count
+          <button
+                        data-debug="verbose"
+                        data-component="off"
+                        data-state="0"
+                        data-pipe="remove->pick,add->pick"
+                        data-trigger="add@click|inc"
+                        data-output="text"
+                    >
+                        0
+                    </button>
+            <div data-statepipe="cart" data-debug="off" class="product grape">
                 <sup class="title">using payload to manage state</sup>
                 <strong class="image">🍇</strong>
                 <div class="controls">
                     <button
-                        data-debug="verbose"
-                        data-component="add-grape"
+                        data-debug="off"
+                        data-component="add"
                         data-state="0"
                         data-pipe="remove->pick,add->pick"
                         data-trigger="add@click|inc"
@@ -22,7 +33,7 @@
                         +
                     </button>
                     <span
-                        data-debug="verbose"
+                        data-debug="off"
                         data-component="log-grape"
                         data-state="0"
                         data-output="text"
@@ -30,7 +41,7 @@
                         >0</span
                     >
                     <button
-                        data-debug="verbose"
+                        data-debug="off"
                         data-component="remove-grape"
                         data-state="0"
                         data-pipe="add->pick,remove->pick"

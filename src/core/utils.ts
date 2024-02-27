@@ -1,4 +1,4 @@
-import type { LogLevel, Logger } from '../statepipe.types';
+import { LogLevel, Logger } from '../statepipe.types';
 
 export const uid = (length = 8) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -14,33 +14,37 @@ export const uid = (length = 8) => {
 
 
 export const getLogger = function (
-  logLevel: LogLevel = 'verbose',
+  logLevel: LogLevel,
   prefix = ''
 ) {
   return {
     getLevel: () => {
       return logLevel
     },
-    changeLevel: (value: LogLevel) => {
-      logLevel = value;
-    },
     log: (...message: any) => {
-      if (logLevel === 'verbose') {
+      if (logLevel === LogLevel.verbose) {
         console.log(`${prefix}`, ...message);
       }
     },
     warn: (...message: any) => {
-      if (logLevel !== 'verbose') {
+      if (logLevel !== LogLevel.verbose) {
         console.warn(`${prefix}`, ...message);
       }
     },
     error: (...message: any) => {
-      if (logLevel === 'error') {
+      if (logLevel === LogLevel.error) {
         console.error(`${prefix}`, ...message);
       }
     },
   } as Logger;
 };
+
+export const getDebugLevel = (node: HTMLElement, defaultLevel: LogLevel) => {
+  if (node.dataset.debug && node.dataset.debug in LogLevel) {
+    return node.dataset.debug as LogLevel
+  }
+  return defaultLevel
+}
 
 
 // export const lensValue = <T extends StateSchema>(

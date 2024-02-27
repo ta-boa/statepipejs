@@ -1,39 +1,38 @@
-import { uid, getLogger } from './core/utils'
+import { uid, getLogger, getDebugLevel } from './core/utils'
 import { createComponent } from './core/component'
-import { InitializationProps, StatepipeProps, Component, LogLevel } from './statepipe.types'
+import { InitializationProps, StatepipeProps, Component, LogLevel, StateSchema, StatePipe } from './statepipe.types'
 
-const Statepipe = (props: StatepipeProps) => {
-    let components: Component[] = []
-    let logLevel: LogLevel = LogLevel.off
-    
+const getStatePipe = (props: StatepipeProps): StatePipe => {
+    const components: Component[] = []
     const id = uid()
+    const belongsToHere = (target: Element) => {
+        return !nestedStatepipes.find((context: Element) => {
+            return context.contains(target)
+        });
+    }
+
     const { node, providers } = props
     const name = node.dataset.statepipe || id
+    const logger = getLogger(getDebugLevel(node, LogLevel.off), `[${name}]`)
+    const nestedStatepipes = Array.from(node.querySelectorAll("[data-statepipe]"));
 
-    if (node.dataset.debug && node.dataset.debug in LogLevel) {
-        logLevel = node.dataset.debug as LogLevel
-    }
-    const logger = getLogger(logLevel, `[${name}]`)
-
-    const onAction = (componentId: string, action: string, payload: any): void => {
-        //logger.log(`${id}.statepipe dispatch '${action}' from ${componentId} payload:`, payload)
+    const onAction = (action: string, payload: StateSchema): void => {
         components.forEach((comp) => {
             comp.pipeState(action, payload)
         })
     }
 
-    components = Array.from(node.querySelectorAll('[data-component]'))
-        .map((node: unknown) => {
-            if (node instanceof HTMLElement) {
-                return createComponent({
+    Array.from(node.querySelectorAll('[data-component]'))
+        .forEach((node: Element) => {
+            if (node instanceof HTMLElement && belongsToHere(node)) {
+                components.push(createComponent({
                     node,
                     providers,
                     onAction,
                     origin: name,
-                })
+                }))
             }
         })
-        .filter((component) => !!component) as Component[]
 
     logger.log(`${components.length} components created`)
 
@@ -57,22 +56,21 @@ const Statepipe = (props: StatepipeProps) => {
 
     return {
         id,
-        components,
+        name,
     }
 }
 
-export default (props: InitializationProps) => {
-    const { targets: selectors, providers } = props
-    return selectors
-        .map((selector) => {
-            return Array.from(selector.querySelectorAll('[data-statepipe]')).map((node) => {
-                if (node instanceof HTMLElement) {
-                    return Statepipe({
-                        node,
-                        providers,
-                    })
-                }
-            })
-        })
-        .flat()
+export default (props: InitializationProps): StatePipe[] => {
+    const { targets, providers } = props
+    const apps = targets.map((selector) => {
+        return Array.from(selector.querySelectorAll('[data-statepipe]')).map((node) => {
+            if (node instanceof HTMLElement) {
+                return getStatePipe({
+                    node,
+                    providers,
+                })
+            }
+        }) as StatePipe[]
+    }).flat()
+    return apps
 }
