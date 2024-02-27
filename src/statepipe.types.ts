@@ -75,6 +75,7 @@ export enum LogLevel {
     warning = 'warning',
     off = 'off',
 }
+
 export interface Logger {
     log: (...message: any) => void
     warn: (...message: any) => void
