@@ -1,30 +1,32 @@
-import { Mock, afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vitest } from 'vitest'
+import { Mock, beforeAll, describe, expect, test, vitest } from 'vitest'
 import { StateSchema, Trigger, TriggerFunction } from '../../statepipe.types'
-import { createPayloadFromState } from "../component"
+import reducePayload from "../reduce.payload"
 import parseTrigger from "../parser.trigger"
 import useState from '../use.state'
 
-const reduceToTen = vitest.fn().mockImplementation((_: Event, s: StateSchema) => {
-    s.value = 10
-    return s;
+const reduceToNumber = vitest.fn().mockImplementation(({ payload }) => {
+    payload.value = 10
+    return payload;
 })
-const reduceToBanjo = vitest.fn().mockImplementation((_: Event, s: StateSchema) => {
-    s.value = "banjo"
-    return s
+
+const reduceToString = vitest.fn().mockImplementation(({ payload }) => {
+    payload.value = "STATEPIPE"
+    return payload
 })
+
 const reduceToUndefined = vitest.fn().mockImplementation(() => {
     return undefined
 })
-const banjo = vitest.fn().mockImplementation(() => reduceToBanjo)
-const ten = vitest.fn().mockImplementation(() => reduceToTen)
-const stop = vitest.fn().mockImplementation(() => reduceToUndefined)
+
+const banjo = reduceToString
+const ten = reduceToNumber
+const stop = reduceToUndefined
 
 const providers: Record<string, TriggerFunction> = {
     banjo, ten, stop
 }
 
-describe("createPayloadFromState", () => {
-
+describe("reducePayload", () => {
     let trigger: Trigger,
         event: Event,
         handler: Mock,
@@ -35,14 +37,14 @@ describe("createPayloadFromState", () => {
         const [trigger] = parseTrigger("add@click");
         const event = new Event(trigger.event);
         const state = { value: "statepipe" }
-        const newState = createPayloadFromState(event, state, trigger, {})
-        expect(newState).toBe(state)
+        const newState = reducePayload(event, state, trigger, {})
+        expect(newState).toStrictEqual(state)
     })
     test("When provider doesnt have the reducer it returns the same state", () => {
         const [trigger] = parseTrigger("add@click|pick");
         const event = new Event(trigger.event);
         const state = { value: "statepipe" }
-        const newState = createPayloadFromState(event, state, trigger, {})
+        const newState = reducePayload(event, state, trigger, {})
         expect(newState).toStrictEqual(state)
     })
 
@@ -53,18 +55,14 @@ describe("createPayloadFromState", () => {
             event = new Event("click")
             handler = vitest.fn()
             state = useState({ value: "statepipe" }, handler)[0]
-            newState = createPayloadFromState(event, state, trigger, providers)
+            newState = reducePayload(event, state, trigger, providers)
         })
-
         test("should prepare the banjo provider with args", () => {
             expect(providers.banjo).toHaveBeenCalledTimes(1);
-            expect(providers.banjo).toHaveBeenCalledWith("foo", "bar");
-        })
-        test("should call banjo reducer with event and state", () => {
-            expect(reduceToBanjo).toHaveBeenCalledTimes(1);
+            expect(providers.banjo).toHaveBeenCalledWith({ payload: { value: "STATEPIPE" }, event, args: ["foo", "bar"] });
         })
         test("should return new state", () => {
-            expect(newState).toStrictEqual({ value: "banjo" })
+            expect(newState).toStrictEqual({ value: "STATEPIPE" })
         })
         test("should not change original state", () => {
             expect(handler).not.toHaveBeenCalled();
@@ -80,22 +78,14 @@ describe("createPayloadFromState", () => {
             event = new Event("click")
             handler = vitest.fn()
             state = useState({ value: "statepipe" }, handler)[0]
-            newState = createPayloadFromState(event, state, trigger, providers)
+            newState = reducePayload(event, state, trigger, providers)
         })
-
         test("should prepare the banjo provider with args", () => {
             expect(providers.banjo).toHaveBeenCalledTimes(1);
-            expect(providers.banjo).toHaveBeenCalledWith("foo", "bar");
-        })
-        test("should call banjo reducer with event and state", () => {
-            expect(reduceToBanjo).toHaveBeenCalled();
         })
         test("should prepare the ten provider with args", () => {
             expect(providers.ten).toHaveBeenCalledTimes(1);
-            expect(providers.ten).toHaveBeenCalledWith("10");
-        })
-        test("should call banjo reducer with event and state", () => {
-            expect(reduceToTen).toHaveBeenCalled();
+            expect(providers.ten).toHaveBeenCalledWith({ payload: { value: 10 }, event, args: ["10"] });
         })
         test("should return new state", () => {
             expect(newState).toStrictEqual({ value: 10 })
@@ -113,7 +103,7 @@ describe("createPayloadFromState", () => {
             event = new Event("click")
             handler = vitest.fn()
             state = useState({ value: "statepipe" }, handler)[0]
-            newState = createPayloadFromState(event, state, trigger, providers)
+            newState = reducePayload(event, state, trigger, providers)
         })
         test("should return new state", () => {
             expect(newState).toBe(undefined)
@@ -130,13 +120,13 @@ describe("createPayloadFromState", () => {
             event = new Event("click")
             handler = vitest.fn()
             state = useState({ value: "statepipe" }, handler)[0]
-            newState = createPayloadFromState(event, state, trigger, providers)
+            newState = reducePayload(event, state, trigger, providers)
         })
         test("should call first reducer and get undefined state", () => {
             expect(newState).toBe(undefined)
         })
         test("should not call the second reducer", () => {
-            expect(reduceToBanjo).not.toHaveBeenCalled()
+            expect(reduceToString).not.toHaveBeenCalled()
         })
         test("should not change original state", () => {
             expect(handler).not.toHaveBeenCalled();

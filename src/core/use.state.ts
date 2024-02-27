@@ -1,5 +1,5 @@
 import { StateSchema } from '../statepipe.types'
-import deepEqual from './deep.equal'
+import { deepEqual } from './utils'
 
 export const onChange = (origin: any, onChangeFunction: Function) => {
     const handler = {

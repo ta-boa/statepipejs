@@ -40,17 +40,27 @@ export interface ComponentProps {
     origin: string
 }
 
-export type OutputFunction = (
-    ...args: string[]
-) => (node: HTMLElement, state: StateSchema) => StateSchema
+export interface OutputProps {
+    node: HTMLElement,
+    state: StateSchema,
+    args: string[]
+}
 
-export type PipeFunction = (
-    ...args: string[]
-) => (payload: StateSchema, state: StateSchema) => StateSchema
+export interface PipeProps {
+    payload: StateSchema,
+    state: StateSchema,
+    args: string[],
+    node: HTMLElement
+}
+export interface TriggerProps {
+    event: Event,
+    payload: StateSchema,
+    args: string[]
+}
 
-export type TriggerFunction = (
-    ...args: string[]
-) => (event: Event, state: StateSchema) => StateSchema | undefined
+export type OutputFunction = (props: OutputProps) => void
+export type PipeFunction = (props: PipeProps) => StateSchema | undefined
+export type TriggerFunction = (props: TriggerProps) => StateSchema | undefined
 
 export interface Providers {
     trigger: Record<string, TriggerFunction>

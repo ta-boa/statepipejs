@@ -1,7 +1,7 @@
-import { OutputFunction, StateSchema } from '../statepipe.types'
+import { OutputFunction } from '../statepipe.types'
 
 export default {
-    text: (_: any) => (node: HTMLElement, state: StateSchema) => {
+    text: ({node, state}) => {
         if (state.value !== undefined){
             node.textContent = JSON.stringify(state.value);
         }

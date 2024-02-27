@@ -1,4 +1,4 @@
-import { uid, getLogger, getDebugLevel } from './core/utils'
+import { uid, getLogger, getDebugLevelFromElement } from './core/utils'
 import { createComponent } from './core/component'
 import { InitializationProps, StatepipeProps, Component, LogLevel, StateSchema, StatePipe } from './statepipe.types'
 
@@ -13,7 +13,7 @@ const getStatePipe = (props: StatepipeProps): StatePipe => {
 
     const { node, providers } = props
     const name = node.dataset.statepipe || id
-    const logger = getLogger(getDebugLevel(node, LogLevel.off), `[${name}]`)
+    const logger = getLogger(getDebugLevelFromElement(node, LogLevel.off), `[${name}]`)
     const nestedStatepipes = Array.from(node.querySelectorAll("[data-statepipe]"));
 
     const onAction = (action: string, payload: StateSchema): void => {

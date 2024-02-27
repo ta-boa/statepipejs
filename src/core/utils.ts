@@ -12,6 +12,50 @@ export const uid = (length = 8) => {
   return id;
 }
 
+export const deepEqual = (a: any, b: any): any => {
+  if (
+    (a === null && b === null) ||
+    (a === undefined && b === undefined) ||
+    (typeof a === 'string' && typeof b === 'string') ||
+    (typeof a === 'number' && typeof b === 'number') ||
+    (typeof a === 'boolean' && typeof b === 'boolean') ||
+    (a instanceof Function && b instanceof Function) ||
+    (a instanceof RegExp && b instanceof RegExp)
+  ) {
+    return a === b;
+  }
+  if (Array.isArray(a) && Array.isArray(b) && a.length !== b.length) {
+    return false;
+  }
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() === b.getTime();
+  }
+  if (typeof a === 'object' && typeof b === 'object') {
+    if (a.constructor !== b.constructor) {
+      return false;
+    }
+    if (a === b || a.valueOf() === b.valueOf()) {
+      return true;
+    }
+    if (!(a instanceof Object)) {
+      return false;
+    }
+    if (!(b instanceof Object)) {
+      return false;
+    }
+
+    let p = Object.keys(a);
+    return (
+      Object.keys(b).every(function (i) {
+        return p.indexOf(i) !== -1;
+      }) &&
+      p.every(function (i) {
+        return deepEqual(a[i], b[i]);
+      })
+    );
+  }
+  return false;
+};
 
 export const getLogger = function (
   logLevel: LogLevel,
@@ -39,62 +83,9 @@ export const getLogger = function (
   } as Logger;
 };
 
-export const getDebugLevel = (node: HTMLElement, defaultLevel: LogLevel) => {
-  if (node.dataset.debug && node.dataset.debug in LogLevel) {
+export const getDebugLevelFromElement = (node: HTMLElement, defaultLevel: LogLevel) => {
+  if (node && node.dataset.debug && node.dataset.debug in LogLevel) {
     return node.dataset.debug as LogLevel
   }
   return defaultLevel
 }
-
-
-// export const lensValue = <T extends StateSchema>(
-//   path: string,
-//   obj: T
-// ): T[keyof T] | undefined => {
-//   const segments = path.split('.');
-//   let current: any = obj;
-//   for (const segment of segments) {
-//     const match = segment.match(/([^\[\]]+)|\[([0-9]+)\]/g);
-//     if (!match) return undefined;
-//     for (const part of match) {
-//       if (Array.isArray(current) && part.startsWith('[') && part.endsWith(']')) {
-//         const index = parseInt(part.slice(1, -1), 10);
-//         current = current[index];
-//       } else if (typeof current === 'object' && current !== null) {
-//         current = current[part];
-//       } else {
-//         return undefined;
-//       }
-//     }
-//   }
-//   return current;
-// };
-
-
-// export const setValue = <T extends StateSchema>(
-//   path: string,
-//   value: any,
-//   obj: T
-// ): T => {
-//   const segments = path.split('.');
-//   let current: any = obj;
-//   let parent: any = obj;
-//   for (let i = 0; i < segments.length; i++) {
-//       const key = segments[i];
-//       const isLastSegment = i === segments.length - 1;
-//       if (current[key] === undefined) {
-//           if (isLastSegment) {
-//               parent[key] = value;
-//           } else {
-//               parent[key] = {};
-//           }
-//       } else if (!isLastSegment) {
-//           if (typeof current[key] !== 'object' || current[key] === null) {
-//               return obj; // Stop the loop and return the original object
-//           }
-//       }
-//       parent = current;
-//       current = current[key];
-//   }
-//   return obj;
-// }
