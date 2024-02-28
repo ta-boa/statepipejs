@@ -26,9 +26,9 @@ export const createComponent = (props: ComponentProps): Component => {
     const logger = getLogger(getDebugLevelFromElement(node, LogLevel.off), `[${origin}:${name}]`)
     const outputReducers = parseOutput(node.dataset.output || '')
     const pipeReducers = parsePipe(node.dataset.pipe || '')
-    const triggerReducers = parseTrigger(node.dataset.trigger || '')
+    const triggerReducers = parseTrigger(node.dataset.trigger || '', node)
+
     const [state, updateState] = useState(parseState(node.dataset.state || ''), (newState) => {
-        logger.log('output state', newState)
         reduceOutput(node, newState, outputReducers, providers.output)
     })
 
@@ -47,6 +47,7 @@ export const createComponent = (props: ComponentProps): Component => {
 
     const handleEventListener = (trigger: Trigger) => (event: Event) => {
         let payload: StateSchema | undefined
+        // handling keyboard events to filter specifics keys
         if (trigger.event.match(/keyup|keydown/) && event instanceof KeyboardEvent) {
             const eventKey = event.key.toLocaleLowerCase()
             const [keyToMatch] = trigger.eventArgs
@@ -69,28 +70,24 @@ export const createComponent = (props: ComponentProps): Component => {
         }
     }
 
-    const subscribe = () => {
-        triggerReducers.forEach((trigger: Trigger) => {
-            const handlerId = `${trigger.event}-${trigger.id}-${trigger.action}`
-            if (!listeners.has(trigger.id)) {
-                const handler = handleEventListener(trigger)
-                node.addEventListener(trigger.event, handler)
-                logger.log(`listen ${trigger.event}->${trigger.action}`)
-                listeners.set(handlerId, handler)
-            }
-        })
-    }
+    triggerReducers.forEach((trigger) => {
+        if (!listeners.has(trigger.id)) {
+            const handler = handleEventListener(trigger)
+            trigger.target.addEventListener(trigger.event, handler)
+            logger.log(`listen ${trigger.event}->${trigger.action} from`, trigger.target)
+            listeners.set(trigger.id, handler)
+        }
+    })
 
     const dispose = () => {
-        Array.from(listeners.entries()).forEach(([key, handler]) => {
-            const [event] = key.split('-')
-            node.removeEventListener(event, handler)
+        triggerReducers.forEach((trigger) => {
+            trigger.target.removeEventListener(trigger.event, listeners.get(trigger.id))
         })
         listeners.clear()
+        triggerReducers.length = 0
+        pipeReducers.length = 0
+        outputReducers.length = 0
     }
-
-    subscribe()
-    logger.log(`created. state:`, state)
 
     return {
         id,

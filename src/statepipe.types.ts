@@ -27,6 +27,7 @@ export interface Trigger {
     eventArgs: string[]
     action: string
     reducers: StateReducer[]
+    target : Window | HTMLElement | Document
 }
 
 export interface Component {

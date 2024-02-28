@@ -1,83 +1,47 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Vite + TS</title>
-    </head>
-    <body>
-        <section id="app" data-statepipe="wrapper">
-          count
-          <button
-                        data-debug="verbose"
-                        data-component="off"
-                        data-state="0"
-                        data-pipe="remove->pick,add->pick"
-                        data-trigger="add@keydown.arrowup|inc"
-                        data-output="text"
-                    >
-                        0
-                    </button>
-            <div data-statepipe="cart" data-debug="off" class="product grape">
-                <sup class="title">using payload to manage state</sup>
-                <strong class="image">🍇</strong>
-                <div class="controls">
-                    <button
-                        data-debug="off"
-                        data-component="add"
-                        data-state="0"
-                        data-pipe="remove->pick,add->pick"
-                        data-trigger="add@click|inc"
-                    >
-                        +
-                    </button>
-                    <span
-                        data-debug="off"
-                        data-component="log-grape"
-                        data-state="0"
-                        data-output="text"
-                        data-pipe="add->pick,remove->pick"
-                        >0</span
-                    >
-                    <button
-                        data-debug="off"
-                        data-component="remove-grape"
-                        data-state="0"
-                        data-pipe="add->pick,remove->pick"
-                        data-trigger="remove@click|dec|max:0"
-                    >
-                        -
-                    </button>
-                </div>
-            </div>
-            <!-- <div class="product banana">
-        <sup class="title">single state</sub>
-        <strong class="image">🍌</strong><br />
-        <div class="controls">
-          <button
-            data-component
-            data-pipe="remove->pick"
-            data-trigger="add@click"
-          >
-            +
-          </button>
-          <span
-            data-component
-            data-state="0"
-            data-output="text"
-            data-pipe="add->pick:self|inc,remove->pick:self|dec"
-            >0</span
-          >
-          <button
-            data-component
-            data-trigger="remove@click"
-          >
-            -
-          </button>
-        </div>
-      </div> -->
-        </section>
-        <script type="module" src="/src/main.ts"></script>
-    </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite + TS</title>
+</head>
+
+<body>
+  <section id="app" data-statepipe="wrapper">
+    counter (keydown + arrowup)
+    <button data-debug="off" data-component="counter" data-state="0" data-pipe="add->pick"
+      data-trigger="add@keydown|inc|preventDefault" data-output="text">
+      100
+    </button>
+    <p>
+      scroll position <span data-state="0" data-trigger="scrl@win.scroll|inc" data-output="text" data-pipe="scrl->pick"
+        data-component="scroll-status">0</span>
+    </p>
+    <p>
+      document click count <span data-state="0" data-debug="off" data-output="text" data-pipe="dc->pick"
+        data-trigger="dc@doc.click|inc" data-component="body-keydown">0</span>
+    </p>
+
+    <div data-statepipe="cart" data-debug="off" class="product grape">
+      <sup class="title">using payload to manage state</sup>
+      <strong class="image">🍇</strong>
+      <div class="controls">
+        <button data-debug="off" data-component="add" data-state="0" data-pipe="remove->pick,add->pick"
+          data-trigger="add@click|inc">
+          +
+        </button>
+        <span data-debug="off" data-component="log-grape" data-state="0" data-output="text"
+          data-pipe="add->pick,remove->pick">0</span>
+        <button data-debug="off" data-component="remove-grape" data-state="0" data-pipe="add->pick,remove->pick"
+          data-trigger="remove@click|dec|max:0">
+          -
+        </button>
+      </div>
+    </div>
+  </section>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>
