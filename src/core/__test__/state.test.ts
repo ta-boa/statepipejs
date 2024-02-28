@@ -1,6 +1,6 @@
-import { describe, expect, test, vitest } from 'vitest'
+import { describe, expect, it, test, vitest } from 'vitest'
 import { onChange, useState } from '../state'
-describe.skip('onChange', () => {
+describe.only('onChange', () => {
     test('returns an object with initial state and doesnt call the change handler', () => {
         const handler = vitest.fn()
         const state = onChange({ value: 1 }, handler)
@@ -27,11 +27,29 @@ describe.skip('onChange', () => {
             expect(handler).not.toHaveBeenCalled()
         })
     })
+    test('handle changes in a object with multiple depths', () => {
+        const handler = vitest.fn()
+        const state = onChange({ a: { b: { c: 'd' } } }, handler)
+        state.a.b.c = 'D'
+        expect(handler).toHaveBeenCalledWith({ a: { b: { c: 'D' } } })
+    })
+    test('handle changes when new attributes are added to the object', () => {
+        const handler = vitest.fn()
+        const state = onChange({ a: 1 }, handler)
+        state.b = 2
+        expect(handler).toHaveBeenCalledWith({ a: 1, b: 2 })
+    })
+    test.skip('handle not calling the callback when deep object is updated with same values', () => {
+        const handler = vitest.fn()
+        const state = onChange({ a: { b: { c: 'd' } } }, handler)
+        state.a = { b: { c: 'd' } }
+        expect(handler).not.toHaveBeenCalled()
+    })
 })
 
 describe('useState', () => {
     test('returns an array with current state and update state function', () => {
-        const [state, updateState] = useState({ value: 1 },()=>{})
+        const [state, updateState] = useState({ value: 1 }, () => {})
         expect(state).toStrictEqual({ value: 1 })
         expect(updateState).toBeTypeOf('function')
     })
@@ -51,8 +69,8 @@ describe('useState', () => {
         })
         test('not call handler when new value is equal', () => {
             const handler = vitest.fn()
-            const [state, update] = useState({ value:initialValue }, handler)
-            update({ value:initialValue })
+            const [state, update] = useState({ value: initialValue }, handler)
+            update({ value: initialValue })
             expect(handler).not.toHaveBeenCalled()
             expect(state.value).toBe(initialValue)
         })

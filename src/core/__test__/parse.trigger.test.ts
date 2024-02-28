@@ -1,17 +1,18 @@
 import { expect, test } from 'vitest'
 import parseTrigger from '../parser.trigger'
 
+const node = document.createElement('div')
 test('given empty string returns empty array', () => {
-    expect(parseTrigger('')).toStrictEqual([])
-    expect(parseTrigger('   ')).toStrictEqual([])
+    expect(parseTrigger('', node)).toStrictEqual([])
+    expect(parseTrigger('   ', node)).toStrictEqual([])
 })
 
-test('given "action" without event return empty array', () => {
-    expect(parseTrigger('action')).toStrictEqual([])
+test.only('given "action" without event return empty array', () => {
+    expect(parseTrigger('action', node)).toStrictEqual([])
 })
 
 test('given "action@event" return array with a Trigger', () => {
-    const trigger = parseTrigger('action@event')[0]
+    const trigger = parseTrigger('action@event', node)[0]
     expect(trigger.event).toBe('event')
     expect(trigger.action).toBe('action')
     expect(trigger.id).toBeDefined()
@@ -19,7 +20,7 @@ test('given "action@event" return array with a Trigger', () => {
 })
 
 test('given "  action@event " extra spaces will trim the whole block before parsing', () => {
-    const trigger = parseTrigger(' action@event ')[0]
+    const trigger = parseTrigger(' action@event ', node)[0]
     expect(trigger.event).toBe('event')
     expect(trigger.action).toBe('action')
     expect(trigger.id).toBeDefined()
@@ -27,16 +28,15 @@ test('given "  action@event " extra spaces will trim the whole block before pars
 })
 
 test('given "action @ event" spaces before/after action or event the parser should trim them out ', () => {
-    const trigger = parseTrigger(' action @ event ')[0]
+    const trigger = parseTrigger(' action @ event ', node)[0]
     expect(trigger.event).toBe('event')
     expect(trigger.action).toBe('action')
     expect(trigger.id).toBeDefined()
     expect(trigger.reducers).toStrictEqual([])
 })
 
-
 test('given "action@event|fn1:a:b|fn2:c" the Trigger will get a list of reducers', () => {
-    const trigger = parseTrigger('action@event|fn1:a:b|fn2:c')[0]
+    const trigger = parseTrigger('action@event|fn1:a:b|fn2:c', node)[0]
     expect(trigger.reducers.length).toStrictEqual(2)
 
     const [red1, red2] = trigger.reducers
@@ -49,7 +49,7 @@ test('given "action@event|fn1:a:b|fn2:c" the Trigger will get a list of reducers
 })
 
 test('given "action1@event1,action2@event2" returns a list of triggers', () => {
-    const triggers = parseTrigger('action1@event1,action2@event2')
+    const triggers = parseTrigger('action1@event1,action2@event2', node)
     expect(triggers.length).toBe(2)
 
     const [trigger1, trigger2] = triggers

@@ -8,8 +8,10 @@ import parseReducer from './parse.reducer'
  * open@click|fn1
  */
 export default (triggers: string, node: HTMLElement): Trigger[] => {
+    if (!triggers || !node) return []
+
     triggers = triggers.trim()
-    if (!triggers.length) return []
+    if (triggers.length === 0) return []
 
     // from "a@click,b@click" to ["a@click","b@click"]
     const actions = triggers.split(',')
@@ -21,15 +23,21 @@ export default (triggers: string, node: HTMLElement): Trigger[] => {
             let target: Window | HTMLElement | Document = node
 
             // from a@click|fn to [a@click,fn]
-            const [eventBlock, ...triggerReducers] = action.split('|')
+            const [eventBlock, ...triggerReducers] = action.trim().split('|')
 
             // from a@click to [a,click]
             const [actionName, eventSchema] = eventBlock.split('@')
-            let [eventName, ...eventArgs] = eventSchema.split(".")
+
+            if (!eventSchema || eventSchema.length === 0) {
+                return
+            }
+
+            let [eventName, ...eventArgs] = eventSchema.split('.')
 
             // wildcards to change the origin of the listener
             if (eventName.match(/^win|doc|body$/)) {
-                target = eventName === "win" ? window : eventName === "doc" ? document : document.body
+                target =
+                    eventName === 'win' ? window : eventName === 'doc' ? document : document.body
                 eventName = eventArgs.shift() as string
             }
 
@@ -40,7 +48,7 @@ export default (triggers: string, node: HTMLElement): Trigger[] => {
                     eventArgs,
                     action: actionName.trim(),
                     reducers: triggerReducers.map(parseReducer),
-                    target
+                    target,
                 } as Trigger
             }
         })
