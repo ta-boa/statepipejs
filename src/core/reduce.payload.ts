@@ -1,21 +1,26 @@
-import { StateReducer, StateSchema, Trigger, TriggerFunction } from "../statepipe.types"
+import { StateSchema, Trigger, TriggerFunction } from "../statepipe.types"
 
 /**
  * Reduce state into a new payload
  */
-export default (
+export default async (
     event: Event,
     state: StateSchema,
     trigger: Trigger,
     provider: Record<string, TriggerFunction>
 ) => {
     let payload: StateSchema | undefined = { ...state }
-    trigger.reducers
-        .filter((reducer) => reducer.name in provider)
-        .forEach((reducer: StateReducer) => {
-            if (payload) {
-                payload = provider[reducer.name]({ event, payload, args: reducer.args })
+    const withFunction = trigger.reducers.filter((reducer) => reducer.name in provider)
+    for (const reducer of withFunction) {
+        if (payload) {
+            const providerFn = provider[reducer.name]
+            const partial = providerFn({ event, payload, args: reducer.args })
+            if (partial instanceof Promise) {
+                payload = await partial
+            } else {
+                payload = partial
             }
-        })
+        }
+    }
     return payload
 }

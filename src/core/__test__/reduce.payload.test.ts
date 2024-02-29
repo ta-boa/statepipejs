@@ -23,39 +23,58 @@ const reduceToUndefined = vitest.fn().mockImplementation(() => {
 const banjo = reduceToString
 const ten = reduceToNumber
 const stop = reduceToUndefined
+const sleep = async () => {
+    await new Promise(resolve => setTimeout(resolve, 0));
+    return { value: "zzz" };
+}
 
 const providers: Record<string, TriggerFunction> = {
     banjo,
     ten,
     stop,
+    sleep,
 }
 
 describe('reducePayload', () => {
-    let trigger: Trigger, event: Event, handler: Mock, state: StateSchema, newState: StateSchema
+    let trigger: Trigger, event: Event, handler: Mock, state: StateSchema, newState: StateSchema | undefined
 
-    test('Given action without reducers should return the same state', () => {
+    describe('Given funciton as promise', () => {
+        beforeAll(async() => {
+            vitest.clearAllMocks()
+            trigger = parseTrigger('boo@click|sleep', node)[0]
+            event = new Event('click')
+            handler = vitest.fn()
+            state = useState({ value: 'statepipe' }, handler)[0]
+        })
+        test('should call first reducer and get undefined state', async() => {
+            const result = await reducePayload(event, state, trigger, providers)
+            expect(result).toStrictEqual({value:"zzz"})
+        })
+    })
+
+    test('Given action without reducers should return the same state', async() => {
         const [trigger] = parseTrigger('add@click', node)
         const event = new Event(trigger.event)
         const state = { value: 'statepipe' }
-        const newState = reducePayload(event, state, trigger, {})
+        const newState = await reducePayload(event, state, trigger, {})
         expect(newState).toStrictEqual(state)
     })
-    test('When provider doesnt have the reducer it returns the same state', () => {
+    test('When provider doesnt have the reducer it returns the same state', async() => {
         const [trigger] = parseTrigger('add@click|pick', node)
         const event = new Event(trigger.event)
         const state = { value: 'statepipe' }
-        const newState = reducePayload(event, state, trigger, {})
+        const newState = await reducePayload(event, state, trigger, {})
         expect(newState).toStrictEqual(state)
     })
 
     describe('Given one trigger', () => {
-        beforeAll(() => {
+        beforeAll(async() => {
             vitest.clearAllMocks()
             trigger = parseTrigger('add@click|banjo:foo:bar', node)[0]
             event = new Event('click')
             handler = vitest.fn()
             state = useState({ value: 'statepipe' }, handler)[0]
-            newState = reducePayload(event, state, trigger, providers)
+            newState = await reducePayload(event, state, trigger, providers)
         })
         test('should prepare the banjo provider with args', () => {
             expect(providers.banjo).toHaveBeenCalledTimes(1)
@@ -71,18 +90,18 @@ describe('reducePayload', () => {
         test('should not change original state', () => {
             expect(handler).not.toHaveBeenCalled()
             expect(state).not.toBe(newState)
-            expect(state.value).not.toBe(newState.value)
+            expect(state.value).not.toBe(newState?.value)
         })
     })
 
     describe('Given multiple triggers', () => {
-        beforeAll(() => {
+        beforeAll(async () => {
             vitest.clearAllMocks()
             trigger = parseTrigger('add@click|banjo:foo:bar|ten:10', node)[0]
             event = new Event('click')
             handler = vitest.fn()
             state = useState({ value: 'statepipe' }, handler)[0]
-            newState = reducePayload(event, state, trigger, providers)
+            newState = await reducePayload(event, state, trigger, providers)
         })
         test('should prepare the banjo provider with args', () => {
             expect(providers.banjo).toHaveBeenCalledTimes(1)
@@ -101,17 +120,17 @@ describe('reducePayload', () => {
         test('should not change original state', () => {
             expect(handler).not.toHaveBeenCalled()
             expect(state).not.toBe(newState)
-            expect(state.value).not.toBe(newState.value)
+            expect(state.value).not.toBe(newState?.value)
         })
     })
 
     describe('Given trigger that returns undefined', () => {
-        beforeAll(() => {
+        beforeAll(async() => {
             trigger = parseTrigger('add@click|stop', node)[0]
             event = new Event('click')
             handler = vitest.fn()
             state = useState({ value: 'statepipe' }, handler)[0]
-            newState = reducePayload(event, state, trigger, providers)
+            newState = await reducePayload(event, state, trigger, providers)
         })
         test('should return new state', () => {
             expect(newState).toBe(undefined)
@@ -122,13 +141,13 @@ describe('reducePayload', () => {
         })
     })
     describe('Having multiple trigger when first reducer returns undefined the others should not be called', () => {
-        beforeAll(() => {
+        beforeAll(async () => {
             vitest.clearAllMocks()
             trigger = parseTrigger('add@click|stop|banjo', node)[0]
             event = new Event('click')
             handler = vitest.fn()
             state = useState({ value: 'statepipe' }, handler)[0]
-            newState = reducePayload(event, state, trigger, providers)
+            newState = await reducePayload(event, state, trigger, providers)
         })
         test('should call first reducer and get undefined state', () => {
             expect(newState).toBe(undefined)
@@ -141,4 +160,5 @@ describe('reducePayload', () => {
             expect(state.value).toBe('statepipe')
         })
     })
+
 })

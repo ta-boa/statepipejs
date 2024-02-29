@@ -60,9 +60,11 @@ export interface TriggerProps {
     args: string[]
 }
 
-export type OutputFunction = (props: OutputProps) => void
-export type PipeFunction = (props: PipeProps) => StateSchema | undefined
-export type TriggerFunction = (props: TriggerProps) => StateSchema | undefined
+export type OutputFunction = (props: OutputProps) => void | Promise<any>
+
+export type PipeFunction<T = StateSchema> = (props: PipeProps) => T | Promise<T> | undefined
+
+export type TriggerFunction<T = StateSchema> = (props: TriggerProps) => T | Promise<T> | undefined;
 
 export interface Providers {
     trigger: Record<string, TriggerFunction>
@@ -92,7 +94,6 @@ export interface Logger {
     log: (...message: any) => void
     warn: (...message: any) => void
     error: (...message: any) => void
-    changeLevel: (value: LogLevel) => void
     getLevel: () => LogLevel
 }
 
