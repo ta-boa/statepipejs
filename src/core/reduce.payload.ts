@@ -1,19 +1,22 @@
-import { StateSchema, Trigger, TriggerFunction } from "../statepipe.types"
+import { StateReducer, StateSchema, TriggerFunction } from "../statepipe.types"
+
+interface Props {
+    event: Event,
+    state: StateSchema,
+    reducers: StateReducer[],
+    providers: Record<string, TriggerFunction>
+}
 
 /**
  * Reduce state into a new payload
  */
-export default async (
-    event: Event,
-    state: StateSchema,
-    trigger: Trigger,
-    provider: Record<string, TriggerFunction>
-) => {
+export default async (props: Props) => {
+    const { event, state, reducers, providers } = props
+    const withFunction = reducers.filter((fn) => fn.name in providers)
     let payload: StateSchema | undefined = { ...state }
-    const withFunction = trigger.reducers.filter((reducer) => reducer.name in provider)
     for (const reducer of withFunction) {
         if (payload) {
-            const providerFn = provider[reducer.name]
+            const providerFn = providers[reducer.name]
             const partial = providerFn({ event, payload, args: reducer.args })
             if (partial instanceof Promise) {
                 payload = await partial

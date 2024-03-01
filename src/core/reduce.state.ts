@@ -1,25 +1,30 @@
-import { Pipe, PipeFunction, StateReducer, StateSchema } from "../statepipe.types"
+import { PipeFunction, StateReducer, StateSchema } from "../statepipe.types"
 
-export default (
-    action: string,
+interface Props {
     node: HTMLElement,
     payload: StateSchema,
     state: StateSchema,
-    pipeList: Pipe[],
-    providers: Record<string, PipeFunction>) => {
+    reducers: StateReducer[],
+    providers: Record<string, PipeFunction>
+}
 
-    const pipeAction = pipeList.find((pipe: Pipe) => pipe.action === action)
+export default async (props: Props) => {
+    const { node, payload, state, reducers, providers } = props
+    const withProvider = reducers.filter((fn) => fn.name in providers)
+    let newState: StateSchema | undefined = { ...state }
+    for (const reducer of withProvider) {
+        // Returning undefined means EOL
+        if (newState) {
+            const providerFn = providers[reducer.name]
+            const partial = providerFn({ payload, state: newState, node, args: reducer.args })
+            if (partial instanceof Promise) {
+                newState = await partial
+            } else {
+                newState = partial
+            }
 
-    if (pipeAction) {
-        let result: StateSchema | undefined = { ...state }
-        pipeAction.reducers
-            .filter((fn) => fn.name in providers)
-            .forEach((fn: StateReducer) => {
-                if (result) {
-                    result = providers[fn.name]({ payload, state: result, node, args: fn.args })
+        }
 
-                }
-            })
-        return result;
+        return newState;
     }
 }

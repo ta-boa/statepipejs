@@ -28,14 +28,28 @@ export const createComponent = (props: ComponentProps): Component => {
     const pipeReducers = parsePipe(node.dataset.pipe || '')
     const triggerReducers = parseTrigger(node.dataset.trigger || '', node)
 
-    const [state, updateState] = useState(parseState(node.dataset.state || ''), (newState) => {
-        reduceOutput(node, newState, outputReducers, providers.output)
+    const [state, updateState] = useState(parseState(node.dataset.state || ''), async (newState) => {
+        await reduceOutput({
+            node,
+            state: newState,
+            reducers: outputReducers,
+            providers: providers.output
+        })
     })
 
-    const pipeState = (action: string, payload: any) => {
+    const pipeState = async (action: string, payload: any) => {
         let newState: StateSchema | undefined = undefined
+        const actionToReduce = pipeReducers.find((pipe) => pipe.action === action)
         try {
-            newState = reduceState(action, node, payload, state, pipeReducers, providers.pipe)
+            if (actionToReduce) {
+                newState = await reduceState({
+                    node,
+                    payload,
+                    state,
+                    reducers: actionToReduce.reducers,
+                    providers: providers.pipe
+                })
+            }
         } catch (err) {
             logger.error('error reducing state', payload, newState)
         }
@@ -45,7 +59,7 @@ export const createComponent = (props: ComponentProps): Component => {
         }
     }
 
-    const handleEventListener = (trigger: Trigger) => (event: Event) => {
+    const handleEventListener = (trigger: Trigger) => async (event: Event) => {
         let payload: StateSchema | undefined
         // handling keyboard events to filter specifics keys
         if (trigger.event.match(/keyup|keydown/) && event instanceof KeyboardEvent) {
@@ -60,7 +74,12 @@ export const createComponent = (props: ComponentProps): Component => {
             }
         }
         try {
-            payload = reducePayload(event, state, trigger, providers.trigger)
+            payload = await reducePayload({
+                event,
+                state,
+                reducers: trigger.reducers,
+                providers: providers.trigger
+            })
         } catch (err) {
             logger.error(`error creating payload`, err)
         }

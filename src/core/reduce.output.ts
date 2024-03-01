@@ -1,21 +1,23 @@
 import { OutputFunction, StateReducer, StateSchema } from "../statepipe.types"
 
-/**
- * Run through all reducers using state to update the view
- */
-export default (
+interface Props {
     node: HTMLElement,
     state: StateSchema,
     reducers: StateReducer[],
     providers: Record<string, OutputFunction>,
-) => {
-    if (!reducers) {
-        return
-    }
-    reducers
-        .filter((fn) => fn.name in providers)
-        .forEach((fn: StateReducer) => {
-            providers[fn.name]({ node, state, args: fn.args })
-        })
+}
 
+/**
+ * Run through all reducers using state to update the view
+ */
+export default async (props: Props) => {
+    const { node, state, reducers, providers } = props
+    const withProvider = reducers.filter((reducer) => reducer.name in providers)
+    for (const reducer of withProvider) {
+        const providerFn = providers[reducer.name]
+        const partial = providerFn({ node, state, args: reducer.args })
+        if (partial instanceof Promise) {
+            await partial
+        }
+    }
 }
