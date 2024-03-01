@@ -2,16 +2,16 @@ import { describe, expect, test } from 'vitest'
 import { uid, deepEqual } from "../utils";
 
 describe("uid()", () => {
-    test("uid() returns a hash with randm 8 chars or numbers", () => {
+    test("returns a hash with randm 8 chars or numbers", () => {
         expect(uid()).toMatch(/^[A-Za-z0-9]{8}$/)
     })
-    test("uid() doenst return same values (1000 attempts only)", () => {
+    test("don't repeat values (1000 attempts only)", () => {
         for (let i = 0; i < 1000; i++) {
             expect(uid()).not.toEqual(uid())
         }
     })
-    test("uid(12) returns a random hash with 12 chars", () => {
-        expect(uid(12).length).toBe(12)
+    test("given new length returns the has with the new length", () => {
+        expect(uid(12)).toMatch(/^[A-Za-z0-9]{12}$/)
     })
 })
 

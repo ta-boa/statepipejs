@@ -25,6 +25,18 @@ test('given "action ->fn:a:b" the action name will be trimmed', () => {
     expect(pipe.action).toStrictEqual('action')
 })
 
+test('given "action ->fn:a:b" the action name will be trimmed', () => {
+    const [pipe] = parser('action ->fn')
+    expect(pipe.action).toStrictEqual('action')
+})
+
+test('given "action->fn1:a:b|fn2" should handle multiple reducers', () => {
+    const [pipe] = parser('action->fn1:a:b|fn2')
+    expect(pipe.reducers.length).toBe(2)
+    expect(pipe.reducers[0].name).toBe("fn1")
+    expect(pipe.reducers[1].name).toBe("fn2")
+})
+
 test('given "action1->fn1:a:b,action2->fn2:c" return a list with 2 triggers', () => {
     const [pipe1, pipe2] = parser('action1->fn1:a:b,action2->fn2:c')
     expect(pipe1.action).toStrictEqual('action1')

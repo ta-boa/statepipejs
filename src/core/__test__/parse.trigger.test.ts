@@ -7,7 +7,7 @@ test('given empty string returns empty array', () => {
     expect(parseTrigger('   ', node)).toStrictEqual([])
 })
 
-test.only('given "action" without event return empty array', () => {
+test('given "action" without event return empty array', () => {
     expect(parseTrigger('action', node)).toStrictEqual([])
 })
 

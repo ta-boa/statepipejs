@@ -22,7 +22,8 @@ export default (pipes: string): Pipe[] => {
             // from action->fn|fn to [action,[..fn]]
             const [actionName, ...actionReducers] = block.trim().split('->')
             const action = actionName.trim()
-            const reducers = actionReducers.map(parseReducer)
+            const reducersToParse = actionReducers.map(chunk => chunk.split("|")).flat()
+            const reducers = reducersToParse.map(parseReducer)
             if (action.length && reducers.length) {
                 return {
                     action: actionName.trim(),
