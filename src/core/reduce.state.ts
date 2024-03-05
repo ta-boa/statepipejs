@@ -24,7 +24,6 @@ export default async (props: Props) => {
             }
 
         }
-
-        return newState;
     }
+    return newState;
 }
