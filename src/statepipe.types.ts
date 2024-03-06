@@ -27,19 +27,21 @@ export interface Trigger {
     eventArgs: string[]
     action: string
     reducers: StateReducer[]
-    target : Window | HTMLElement | Document
+    target: Window | HTMLElement | Document
 }
 
 export interface Component {
     id: string
+    node: HTMLElement,
     pipeState: (action: string, payload: StateSchema) => void
+    dispose : () => void
 }
 
 export interface ComponentProps {
     node: HTMLElement
     providers: Providers
     onAction: (action: string, state: any) => void
-    origin: string
+    statepipe: string
 }
 
 export interface OutputProps {
@@ -100,4 +102,5 @@ export interface Logger {
 export interface StatePipe {
     id: string
     name: string
+    dispose : () => void
 }

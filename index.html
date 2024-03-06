@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <section id="app" data-statepipe="wrapper">
+  <section id="app" data-statepipe="wrapper" data-debug="verbose">
     counter (only via keydown)
     <button data-debug="off" data-component="counter" data-state="0" data-pipe="add->pick"
       data-trigger="add@keydown|inc|preventDefault" data-output="text">
@@ -22,6 +22,19 @@
     <p>
       document click count <span data-state="0" data-debug="off" data-output="text" data-pipe="dc->pick"
         data-trigger="dc@doc.click|inc" data-component="body-keydown">0</span>
+    </p>
+    <p>
+      auto remove <button data-component data-state="0" data-debug="off" data-output="remove" data-pipe="remove->inc"
+        data-trigger="remove@click">remove</button>
+    </p>
+    <p>
+      add new component <button data-component="add item" data-trigger="new@click">new</button>
+      <div data-component="items wrapper" data-debug="verbose" data-state="0" data-pipe="new->inc" data-output="template">
+        <template id="remove-button">
+          <button data-component data-state="0" data-debug="verbose" data-output="remove" data-pipe="remove->inc"
+            data-trigger="remove@click">remove</button>
+        </template>
+      </div>
     </p>
 
     <div data-statepipe="cart" data-debug="off" class="product grape">

@@ -2,8 +2,8 @@ import { uid, getLogger, getDebugLevelFromElement } from './core/utils'
 import { createComponent } from './core/component'
 import { InitializationProps, StatepipeProps, Component, LogLevel, StateSchema, StatePipe } from './statepipe.types'
 
-const getStatePipe = (props: StatepipeProps): StatePipe => {
-    const components: Component[] = []
+const createStatepipe = (props: StatepipeProps): StatePipe => {
+    let components: Component[] = []
     const id = uid()
     const belongsToHere = (target: Element) => {
         return !nestedStatepipes.find((context: Element) => {
@@ -29,34 +29,45 @@ const getStatePipe = (props: StatepipeProps): StatePipe => {
                     node,
                     providers,
                     onAction,
-                    origin: name,
+                    statepipe: name,
                 }))
             }
         })
 
-    logger.log(`${components.length} components created`)
+    const handleMutation: MutationCallback = (mutations) => {
+        const toInitialize: Component[] = []
+        for(let mutation of mutations){
+            if (mutation.type == "childList" && mutation.removedNodes.length) {
+                for(let n of mutation.removedNodes){
+                    // listing components that were removed to dispose
+                    components = components.map(c=>{
+                        if (c.node === n){
+                            c.dispose()
+                            return undefined
+                        }
+                        return c
+                    }).filter(c=>!!c) as Component[]
+                }
+            }
+        }
+    };
 
-    //  const handleMutation = (mutations) => {
-    //    console.log('mutations', mutations);
-    //  };
-    //
-    //  const observer = new MutationObserver(handleMutation);
-    //
-    //  const observe = () => {
-    //    observer.observe(node, {
-    //      subtree: true,
-    //      attributeFilter: ['data-sp-trigger', 'data-sp-pipe', 'data-sp-output'],
-    //    });
-    //    _status = 'observing';
-    //  };
-    //  const disconect = () => {
-    //    observer.disconnect();
-    //    _status = 'idle';
-    //  };
+    const observer = new MutationObserver(handleMutation);
+    observer.observe(node, {
+        subtree: true,
+        childList: true
+    });
+
+    const dispose = () => {
+        observer.disconnect();
+    };
+
+    logger.log(`${components.length} components created`)
 
     return {
         id,
         name,
+        dispose
     }
 }
 
@@ -65,7 +76,7 @@ export default (props: InitializationProps): StatePipe[] => {
     const apps = targets.map((selector) => {
         return Array.from(selector.querySelectorAll('[data-statepipe]')).map((node) => {
             if (node instanceof HTMLElement) {
-                return getStatePipe({
+                return createStatepipe({
                     node,
                     providers,
                 })

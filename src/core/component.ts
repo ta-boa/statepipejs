@@ -17,24 +17,29 @@ import {
 } from '../statepipe.types'
 
 export const createComponent = (props: ComponentProps): Component => {
-    const { node, providers, onAction, origin } = props
+    const { node, providers, onAction, statepipe } = props
     const id = uid()
     const listeners = new Map()
     const name = node.dataset.component || id
 
     // from element
-    const logger = getLogger(getDebugLevelFromElement(node, LogLevel.off), `[${origin}:${name}]`)
+    const logger = getLogger(getDebugLevelFromElement(node, LogLevel.off), `[${statepipe}:${name}]`)
     const outputReducers = parseOutput(node.dataset.output || '')
     const pipeReducers = parsePipe(node.dataset.pipe || '')
     const triggerReducers = parseTrigger(node.dataset.trigger || '', node)
 
     const [state, updateState] = useState(parseState(node.dataset.state || ''), async (newState) => {
-        await reduceOutput({
-            node,
-            state: newState,
-            reducers: outputReducers,
-            providers: providers.output
-        })
+        logger.log("state changed", newState)
+        try {
+            await reduceOutput({
+                node,
+                state: newState,
+                reducers: outputReducers,
+                providers: providers.output
+            })
+        } catch (err) {
+            logger.error("output error", err)
+        }
     })
 
     const pipeState = async (action: string, payload: any) => {
@@ -54,7 +59,7 @@ export const createComponent = (props: ComponentProps): Component => {
             logger.error('error reducing state', payload, newState)
         }
         if (newState) {
-            logger.log(`| '${action}' state:`, payload)
+            logger.log(`pipe '${action}' state:`, newState)
             updateState(newState)
         }
     }
@@ -106,11 +111,13 @@ export const createComponent = (props: ComponentProps): Component => {
         triggerReducers.length = 0
         pipeReducers.length = 0
         outputReducers.length = 0
+        logger.log("disposed")
     }
 
     return {
         id,
         pipeState,
         dispose,
+        node,
     } as Component
 }
