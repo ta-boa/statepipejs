@@ -11,6 +11,40 @@ export type StateSchema = {
     value: NestedValue
 }
 
+export interface InitializationProps {
+    targets: HTMLElement[]
+    providers: Providers
+}
+
+export interface StatepipeProps {
+    node: HTMLElement
+    providers: Providers
+    logLevel?: LogLevel
+}
+
+export interface StatePipe {
+    id: string
+    name: string
+    dispose: () => void
+    addComponent: (node:HTMLElement) => void
+    removeComponent:(node:HTMLElement) => void
+}
+
+
+export interface Component {
+    id: string
+    node: HTMLElement,
+    pipeState: (action: string, payload: StateSchema) => void
+    dispose: () => void
+}
+
+export interface ComponentProps {
+    node: HTMLElement
+    providers: Providers
+    onAction: (action: string, state: any) => void
+    statepipe: string
+}
+
 export interface StateReducer {
     name: string
     args: string[]
@@ -30,19 +64,6 @@ export interface Trigger {
     target: Window | HTMLElement | Document
 }
 
-export interface Component {
-    id: string
-    node: HTMLElement,
-    pipeState: (action: string, payload: StateSchema) => void
-    dispose : () => void
-}
-
-export interface ComponentProps {
-    node: HTMLElement
-    providers: Providers
-    onAction: (action: string, state: any) => void
-    statepipe: string
-}
 
 export interface OutputProps {
     node: HTMLElement
@@ -74,17 +95,6 @@ export interface Providers {
     output: Record<string, OutputFunction>
 }
 
-export interface InitializationProps {
-    targets: HTMLElement[]
-    providers: Providers
-}
-
-export interface StatepipeProps {
-    node: HTMLElement
-    providers: Providers
-    logLevel?: LogLevel
-}
-
 export enum LogLevel {
     verbose = 'verbose',
     error = 'error',
@@ -97,10 +107,4 @@ export interface Logger {
     warn: (...message: any) => void
     error: (...message: any) => void
     getLevel: () => LogLevel
-}
-
-export interface StatePipe {
-    id: string
-    name: string
-    dispose : () => void
 }

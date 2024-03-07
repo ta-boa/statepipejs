@@ -20,7 +20,7 @@ export const createComponent = (props: ComponentProps): Component => {
     const { node, providers, onAction, statepipe } = props
     const id = uid()
     const listeners = new Map()
-    const name = node.dataset.component || id
+    const name = node.dataset.component ? `${node.dataset.component}.${id}` : id
 
     // from element
     const logger = getLogger(getDebugLevelFromElement(node, LogLevel.off), `[${statepipe}:${name}]`)
@@ -67,14 +67,11 @@ export const createComponent = (props: ComponentProps): Component => {
     const handleEventListener = (trigger: Trigger) => async (event: Event) => {
         let payload: StateSchema | undefined
         // handling keyboard events to filter specifics keys
-        if (trigger.event.match(/keyup|keydown/) && event instanceof KeyboardEvent) {
+        if (event instanceof KeyboardEvent) {
             const eventKey = event.key.toLocaleLowerCase()
             const [keyToMatch] = trigger.eventArgs
-            if (
-                keyToMatch &&
-                keyToMatch.length &&
-                !eventKey.match(keyToMatch.toLocaleLowerCase())
-            ) {
+            // check if the trigger is waiting for specific keys
+            if (keyToMatch?.length && !eventKey.match(keyToMatch.toLocaleLowerCase())) {
                 return
             }
         }
@@ -98,7 +95,7 @@ export const createComponent = (props: ComponentProps): Component => {
         if (!listeners.has(trigger.id)) {
             const handler = handleEventListener(trigger)
             trigger.target.addEventListener(trigger.event, handler)
-            logger.log(`listen ${trigger.event}->${trigger.action} from`, trigger.target)
+            logger.log(`listen ${trigger.event}->${trigger.action} from`)
             listeners.set(trigger.id, handler)
         }
     })
@@ -108,9 +105,9 @@ export const createComponent = (props: ComponentProps): Component => {
             trigger.target.removeEventListener(trigger.event, listeners.get(trigger.id))
         })
         listeners.clear()
-        triggerReducers.length = 0
-        pipeReducers.length = 0
-        outputReducers.length = 0
+        triggerReducers.length =
+            pipeReducers.length =
+            outputReducers.length = 0
         logger.log("disposed")
     }
 

@@ -27,15 +27,15 @@
       auto remove <button data-component data-state="0" data-debug="off" data-output="remove" data-pipe="remove->inc"
         data-trigger="remove@click">remove</button>
     </p>
-    <p>
-      add new component <button data-component="add item" data-trigger="new@click">new</button>
-      <div data-component="items wrapper" data-debug="verbose" data-state="0" data-pipe="new->inc" data-output="template">
-        <template id="remove-button">
-          <button data-component data-state="0" data-debug="verbose" data-output="remove" data-pipe="remove->inc"
-            data-trigger="remove@click">remove</button>
-        </template>
-      </div>
-    </p>
+    
+    <p>add new component <button data-component="add item" data-trigger="new@click">new</button></p>
+    <div data-component="button-factory" data-debug="verbose" data-state="0" data-pipe="new->inc" data-output="template">
+      <template id="remove-button">
+        <button data-component data-state="0" data-debug="verbose" data-output="remove" data-pipe="remove->inc"
+          data-trigger="remove@click">remove</button>
+      </template>
+    </div>
+  
 
     <div data-statepipe="cart" data-debug="off" class="product grape">
       <sup class="title">using payload to manage state</sup>

@@ -5,16 +5,10 @@ import { InitializationProps, StatepipeProps, Component, LogLevel, StateSchema, 
 const createStatepipe = (props: StatepipeProps): StatePipe => {
     let components: Component[] = []
     const id = uid()
-    const belongsToHere = (target: Element) => {
-        return !nestedStatepipes.find((context: Element) => {
-            return context.contains(target)
-        });
-    }
-
     const { node, providers } = props
+
     const name = node.dataset.statepipe || id
     const logger = getLogger(getDebugLevelFromElement(node, LogLevel.off), `[${name}]`)
-    const nestedStatepipes = Array.from(node.querySelectorAll("[data-statepipe]"));
 
     const onAction = (action: string, payload: StateSchema): void => {
         components.forEach((comp) => {
@@ -22,31 +16,37 @@ const createStatepipe = (props: StatepipeProps): StatePipe => {
         })
     }
 
-    Array.from(node.querySelectorAll('[data-component]'))
-        .forEach((node: Element) => {
-            if (node instanceof HTMLElement && belongsToHere(node)) {
-                components.push(createComponent({
-                    node,
-                    providers,
-                    onAction,
-                    statepipe: name,
-                }))
-            }
-        })
+    const filterMutations = (list: NodeList) => Array.from(list).filter(n => n.nodeType === 1)
 
     const handleMutation: MutationCallback = (mutations) => {
-        const toInitialize: Component[] = []
-        for(let mutation of mutations){
-            if (mutation.type == "childList" && mutation.removedNodes.length) {
-                for(let n of mutation.removedNodes){
+        for (let mutation of mutations) {
+            if (mutation.type === "childList") {
+                if (mutation.removedNodes.length) {
                     // listing components that were removed to dispose
-                    components = components.map(c=>{
-                        if (c.node === n){
-                            c.dispose()
-                            return undefined
+                    for (let rmNode of filterMutations(mutation.removedNodes)) {
+                        // prevent from iterating over #text changes
+                        components = components.map(c => {
+                            if (c.node === rmNode) {
+                                c.dispose()
+                                return undefined
+                            }
+                            return c
+                        }).filter(c => !!c) as Component[]
+                    }
+                }
+                if (mutation.addedNodes.length) {
+                    // listing components that were removed to dispose
+                    for (let newNode of filterMutations(mutation.addedNodes)) {
+                        // prevent from iterating over #text changes
+                        if (newNode instanceof HTMLElement && newNode.hasAttribute("data-component")) {
+                            components.push(createComponent({
+                                node: newNode,
+                                providers,
+                                onAction,
+                                statepipe: name
+                            }))
                         }
-                        return c
-                    }).filter(c=>!!c) as Component[]
+                    }
                 }
             }
         }
@@ -60,14 +60,33 @@ const createStatepipe = (props: StatepipeProps): StatePipe => {
 
     const dispose = () => {
         observer.disconnect();
+        components.forEach(c => c.dispose())
+        components.length = 0
     };
+
+    const addComponent = (el: HTMLElement) => {
+        components.push(createComponent({
+            node: el,
+            providers,
+            onAction,
+            statepipe: name,
+        }))
+    }
+
+    const removeComponent = (el: HTMLElement) => {
+        if (components.find((item)=>item.node === el)){
+            console.log("rmeove", el)
+        }
+    }
 
     logger.log(`${components.length} components created`)
 
     return {
         id,
         name,
-        dispose
+        dispose,
+        addComponent,
+        removeComponent
     }
 }
 
@@ -76,10 +95,24 @@ export default (props: InitializationProps): StatePipe[] => {
     const apps = targets.map((selector) => {
         return Array.from(selector.querySelectorAll('[data-statepipe]')).map((node) => {
             if (node instanceof HTMLElement) {
-                return createStatepipe({
+                const sp = createStatepipe({
                     node,
                     providers,
-                })
+                });
+                const nestedStatepipes = Array.from(node.querySelectorAll("[data-statepipe]"));
+                const belongsToHere = (target: Element) => {
+                    return !nestedStatepipes.find((context: Element) => {
+                        return context.contains(target)
+                    });
+                }
+                Array
+                    .from(node.querySelectorAll('[data-component]'))
+                    .forEach((el: Element) => {
+                        if (el instanceof HTMLElement && belongsToHere(el)) {
+                            sp.addComponent(el)
+                        }
+                    })
+                return sp
             }
         }) as StatePipe[]
     }).flat()
