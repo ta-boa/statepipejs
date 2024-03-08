@@ -75,7 +75,7 @@ const createStatepipe = (props: StatepipeProps): StatePipe => {
 
     const removeComponent = (el: HTMLElement) => {
         if (components.find((item)=>item.node === el)){
-            console.log("rmeove", el)
+            console.log("remove", el)
         }
     }
 

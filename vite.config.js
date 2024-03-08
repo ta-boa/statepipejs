@@ -1,16 +1,21 @@
 import { defineConfig } from 'vite'
+import commonjs from '@rollup/plugin-commonjs'
 import { resolve } from 'path'
 
 export default defineConfig({
-    build: {
+    server: {
+        open: 'site/index.html',
+    },
+    buildLibrary: {
         target: 'esnext',
-        minify: 'terser',
+        minify: 'esbuild',
         outDir: 'library/dist',
         emptyOutDir: true,
         polyfillModulePreload: true,
         lib: {
-            entry: resolve('./library/statepipe.ts'),
+            entry: resolve(__dirname, './library/statepipe.ts'),
             name: 'statepipe',
         },
+        rollupOptions: [commonjs()],
     },
 })
