@@ -1,6 +1,6 @@
 import './styles/style.css'
 import providers from "./providers";
-import statepipe from "./statepipe";
+import statepipe from "../library/statepipe";
 
 statepipe({
     targets:[document.body],

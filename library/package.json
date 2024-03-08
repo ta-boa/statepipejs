@@ -1,0 +1,19 @@
+{
+  "name": "statepipe",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "description": "",
+  "main": "./dist/statepipe.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/statepipe.js",
+      "require": "./dist/statepie.umd.cjs"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

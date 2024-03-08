@@ -17,5 +17,8 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.0",
     "vitest": "^1.2.2"
+  },
+  "dependencies": {
+    "terser": "^5.29.1"
   }
 }
