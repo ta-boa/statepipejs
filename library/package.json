@@ -10,7 +10,7 @@
   "exports": {
     ".": {
       "import": "./dist/statepipe.js",
-      "require": "./dist/statepie.umd.cjs"
+      "require": "./dist/statepipe.umd.cjs"
     }
   },
   "keywords": [],
