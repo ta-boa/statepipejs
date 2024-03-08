@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "vitest",
-    "coverage": "vitest run --coverage ./library",
+    "test": "vitest ./library",
+    "coverage": "vitest ./library run --coverage --run",
     "build:library": "tsc && vite buildLibrary",
     "build:site": "tsc && vite buildSite",
     "preview": "vite preview"
