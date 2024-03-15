@@ -1,4 +1,3 @@
-// import './styles/style.css'
 // import providers from "./providers";
 // import statepipe from "../library/statepipe";
 
@@ -6,3 +5,4 @@
 //     targets:[document.body],
 //     providers,
 // })
+console.log("INDEX")

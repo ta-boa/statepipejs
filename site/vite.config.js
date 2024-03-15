@@ -8,7 +8,7 @@ export default defineConfig({
     },
     plugins: [
         handlebars({
-            partialDirectory: resolve(__dirname, 'partials'),
+            partialDirectory: resolve(__dirname, '_partials'),
             context: {
                 title: 'statepipe',
             },
