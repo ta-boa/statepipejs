@@ -1,0 +1,8 @@
+export default {
+    "trailingComma": "es5",
+    "tabWidth": 4,
+    "printWidth": 100,
+    "bracketSameLine": false,
+    "semi": false,
+    "singleQuote": true
+}
