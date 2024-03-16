@@ -91,3 +91,14 @@ main section h3 {
 main section p {
     margin-bottom:0.6rem;
 }
+
+
+button {
+    user-select: none;
+    outline: 0;
+    border: 1px solid;
+    padding:0.2rem;
+    appearance: none;
+    line-height: 1ch;
+    padding:0.3rem;
+}

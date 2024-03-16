@@ -6,10 +6,10 @@
     "dev": "vite",
     "build": "vite build"
   },
+  "type": "module",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "happy-dom": "^13.3.8",
-    "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "vite": "^5.1.0",
     "vite-plugin-handlebars": "^2.0.0",

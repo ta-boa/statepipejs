@@ -1,22 +1,49 @@
 <!doctype html>
 <html lang="en">
-    {{> head }}
-    <body>
-        {{> header}}
-        <main>
-            {{> nav}}
-            <section>
-                <h2>Getting started</h2>
-                <p>Statepipe is made to work with the existent html in your project by adding data attributes in the elements you want to turn into components</p>
-                <p>The make one component to interact with another component you need to have an element that works as a wrapper/context, here we call it a <strong>statepipe</strong>.</p>
-                <p>Now, let's see how it works</p>
-                <div data-statepipe data-debug="verbose">
-                    <button data-component data-trigger="inc@click" data-debug="verbose">+</button>
-                    <span data-component data-state="0" data-pipe="inc->get,dec->get">0</span>
-                    <button data-component data-trigger="dec@click" data-debug="verbose">-</button>
-                </div>
-            </section>
-        </main>
-        {{> footer}}
-    </body>
+{{> head }}
+
+<body>
+    {{> header}}
+    <main>
+        {{> nav}}
+        <section>
+            <h2>Getting started</h2>
+            <p>Statepipe is made to work with the existent html in your project by adding data attributes in the
+                elements you want to turn into components</p>
+            <p>The make one component to interact with another component you need to have an element that works as a
+                wrapper/context, here we call it a <strong>statepipe</strong>.</p>
+            <p>Now, let's see how it works</p>
+            <div data-statepipe="counter" data-debug="verbose">
+                <button data-component="increment" data-trigger="add@click" data-debug="verbose">+</button>
+                <span data-component data-state="0" data-pipe="add->inc,rm->dec" data-output="text">0</span>
+                <button data-component="decrement" data-trigger="rm@click" data-debug="verbose">-</button>
+            </div>
+        </section>
+    </main>
+    {{> footer}}
+    <script type="module">
+        import statepipe from '../../library/index.ts';
+        statepipe({
+            targets: [document.body],
+            providers: {
+                output: {
+                    text: ({ node, state }) => {
+                        node.textContent = state.value
+                    }
+                },
+                pipe: {
+                    inc: ({ state, args }) => {
+                        state.value += 1;
+                        return state;
+                    },
+                    dec: ({ state, args }) => {
+                        state.value -= 1
+                        return state;
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
 </html>
